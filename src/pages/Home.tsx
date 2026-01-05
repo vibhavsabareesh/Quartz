@@ -302,7 +302,7 @@ export default function Home() {
               <p className="text-muted-foreground">{experienceProfile.energyMessage}</p>
             </div>
             
-            {hasMode('energy_mode') && (
+            {hasMode('chronic_fatigue') && (
               <div className="space-y-2">
                 <p className="text-sm text-muted-foreground">How's your energy?</p>
                 <EnergySelector value={energyLevel} onChange={setEnergyLevel} />

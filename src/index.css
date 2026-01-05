@@ -1,8 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* NeuroStudy Design System - Calm, Accessible, Adaptive */
+/* This CSS implements VISIBLE changes for different disability modes */
 
 @layer base {
   :root {
@@ -136,61 +139,192 @@
 
   body {
     @apply bg-background text-foreground antialiased;
+    font-family: 'Lexend', system-ui, -apple-system, sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+    transition: all 0.3s ease;
   }
 
-  /* Sensory-safe mode: reduce all motion globally */
+  /* ============================================ */
+  /* DYSLEXIA MODE - DRAMATIC VISUAL CHANGES */
+  /* ============================================ */
+  
+  .dyslexia-mode {
+    /* Use OpenDyslexic-like styling with Lexend (proven dyslexia-friendly) */
+    font-family: 'Lexend', sans-serif !important;
+    letter-spacing: 0.12em !important;
+    word-spacing: 0.3em !important;
+  }
+  
+  .dyslexia-mode * {
+    font-family: 'Lexend', sans-serif !important;
+  }
+  
+  .dyslexia-mode p,
+  .dyslexia-mode li,
+  .dyslexia-mode span,
+  .dyslexia-mode div,
+  .dyslexia-mode h1,
+  .dyslexia-mode h2,
+  .dyslexia-mode h3,
+  .dyslexia-mode h4,
+  .dyslexia-mode label {
+    font-size: 1.2rem !important;
+    line-height: 2.2 !important;
+    letter-spacing: 0.08em !important;
+    word-spacing: 0.2em !important;
+  }
+  
+  .dyslexia-mode h1 {
+    font-size: 2rem !important;
+  }
+  
+  .dyslexia-mode h2 {
+    font-size: 1.6rem !important;
+  }
+  
+  .dyslexia-mode .reading-content {
+    max-width: 600px !important;
+    margin: 0 auto;
+    background: hsl(60 30% 97%);
+    padding: 2rem !important;
+    border-radius: 1rem;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+  }
+  
+  .dyslexia-mode .reading-chunk {
+    margin-bottom: 2rem !important;
+    padding: 1.5rem !important;
+    background: hsl(60 25% 95%) !important;
+    border-left: 4px solid hsl(var(--primary));
+    border-radius: 0 var(--radius) var(--radius) 0;
+  }
+
+  /* ============================================ */
+  /* SENSORY-SAFE MODE (EPILEPSY + SPS) */
+  /* ============================================ */
+  
+  .sensory-safe {
+    /* Muted, calm color overrides */
+    --background: 200 10% 96%;
+    --foreground: 200 15% 25%;
+    --primary: 200 20% 50%;
+    --accent: 200 15% 60%;
+    --card: 200 8% 94%;
+  }
+  
   .sensory-safe *,
   .sensory-safe *::before,
   .sensory-safe *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+    animation: none !important;
+  }
+  
+  .sensory-safe button,
+  .sensory-safe a,
+  .sensory-safe [role="button"] {
+    transform: none !important;
+  }
+  
+  .sensory-safe button:hover,
+  .sensory-safe a:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+  
+  /* Remove any potential flashing/pulsing */
+  .sensory-safe .timer-active,
+  .sensory-safe .pulse,
+  .sensory-safe .animate-pulse {
+    animation: none !important;
+  }
+  
+  /* Lower contrast for eye comfort */
+  .sensory-safe {
+    filter: contrast(0.9) saturate(0.7);
   }
 
-  /* Reading support mode: enhanced typography */
-  .reading-support {
-    --font-size-base: 1.125rem;
-    --line-height-base: 2;
+  /* ============================================ */
+  /* ADHD MODE - FOCUS ENHANCING */
+  /* ============================================ */
+  
+  .adhd-mode {
+    /* Slightly higher contrast for focus */
+    --primary: 174 70% 35%;
+  }
+  
+  /* Highlight the current/next action */
+  .adhd-mode .next-action {
+    border: 3px solid hsl(var(--primary)) !important;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3) !important;
+    background: hsl(var(--primary) / 0.1) !important;
+  }
+  
+  .adhd-mode .quick-start-btn {
+    font-size: 1.3rem !important;
+    padding: 1.5rem 2.5rem !important;
+    animation: pulse-gentle 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-gentle {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4); }
+    50% { box-shadow: 0 0 0 12px hsl(var(--primary) / 0); }
+  }
+  
+  /* Make streaks/XP more visible */
+  .adhd-mode .xp-display {
+    font-size: 1.4rem !important;
+    font-weight: bold !important;
   }
 
-  .reading-support p,
-  .reading-support li,
-  .reading-support span:not(.icon) {
-    font-size: var(--font-size-reading);
-    line-height: var(--line-height-reading);
-    letter-spacing: 0.02em;
-    word-spacing: 0.1em;
+  /* ============================================ */
+  /* AUTISM MODE - PREDICTABLE LAYOUT */
+  /* ============================================ */
+  
+  .autism-mode {
+    /* No unexpected changes */
+  }
+  
+  .autism-mode .card-interactive:hover {
+    transform: none !important;
+  }
+  
+  .autism-mode * {
+    transition: none !important;
   }
 
-  .reading-support .reading-chunk {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: hsl(var(--muted) / 0.3);
-    border-radius: var(--radius);
-  }
-
-  .reading-support .highlight-current {
-    background: hsl(var(--primary) / 0.15);
-    border-left: 3px solid hsl(var(--primary));
-    padding-left: 1rem;
-  }
-
-  /* Motor-friendly mode: larger touch targets */
+  /* ============================================ */
+  /* MOTOR-FRIENDLY MODE */
+  /* ============================================ */
+  
   .motor-friendly button,
   .motor-friendly a,
   .motor-friendly [role="button"],
   .motor-friendly input,
   .motor-friendly select,
-  .motor-friendly textarea {
-    min-height: var(--touch-target-large);
-    min-width: var(--touch-target-large);
-    padding: 0.75rem 1.25rem;
-  }
-
+  .motor-friendly textarea,
   .motor-friendly .touch-target {
-    min-height: var(--touch-target-large);
-    min-width: var(--touch-target-large);
+    min-height: 60px !important;
+    min-width: 60px !important;
+    padding: 1rem 1.5rem !important;
+    font-size: 1.1rem !important;
+  }
+  
+  .motor-friendly .card {
+    padding: 1.5rem !important;
+  }
+  
+  .motor-friendly .gap-2 {
+    gap: 1rem !important;
+  }
+  
+  .motor-friendly .gap-3 {
+    gap: 1.25rem !important;
+  }
+  
+  .motor-friendly .gap-4 {
+    gap: 1.5rem !important;
   }
 }
 
@@ -335,6 +469,24 @@
       transparent
     );
   }
+  
+  /* AI Tutor chat bubble */
+  .ai-tutor-bubble {
+    @apply p-4 rounded-2xl;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+  }
+  
+  .ai-tutor-bubble.user {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border-radius: 1rem 1rem 0.25rem 1rem;
+  }
+  
+  .ai-tutor-bubble.assistant {
+    background: hsl(var(--muted));
+    border-radius: 1rem 1rem 1rem 0.25rem;
+  }
 }
 
 /* Scrollbar styling */
@@ -355,9 +507,4 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
-}
-
-/* Custom fonts - using system fonts for accessibility */
-html {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }

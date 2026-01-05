@@ -1,11 +1,14 @@
-import * as React from "react";
-import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Check } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface ModeCardProps {
   icon: string;
   label: string;
+  subtitle?: string;
   description: string;
+  features?: string[];
   selected: boolean;
   onToggle: () => void;
   className?: string;
@@ -14,22 +17,24 @@ interface ModeCardProps {
 export function ModeCard({
   icon,
   label,
+  subtitle,
   description,
+  features,
   selected,
   onToggle,
   className,
 }: ModeCardProps) {
   return (
-    <button
-      type="button"
+    <motion.button
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onToggle}
       className={cn(
-        "relative flex flex-col items-start gap-3 p-5 rounded-xl border-2 text-left transition-all duration-200",
-        "hover:border-primary/50 hover:bg-primary/5",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+        "relative w-full p-5 rounded-xl border-2 text-left transition-all",
+        "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
         selected
-          ? "border-primary bg-primary/10 shadow-md"
-          : "border-border bg-card",
+          ? "border-primary bg-primary/5 shadow-lg"
+          : "border-border bg-card hover:border-primary/50 hover:bg-muted/50",
         className
       )}
     >
@@ -38,13 +43,43 @@ export function ModeCard({
           <Check className="w-4 h-4 text-primary-foreground" />
         </div>
       )}
-      <span className="text-3xl" role="img" aria-hidden>
-        {icon}
-      </span>
-      <div>
-        <h3 className="font-semibold text-foreground">{label}</h3>
-        <p className="text-sm text-muted-foreground mt-1">{description}</p>
+
+      <div className="flex items-start gap-3 mb-3">
+        <span className="text-3xl">{icon}</span>
+        <div className="flex-1">
+          <h3 className="font-bold text-lg text-foreground">{label}</h3>
+          {subtitle && (
+            <p className="text-sm text-muted-foreground italic">{subtitle}</p>
+          )}
+        </div>
       </div>
-    </button>
+
+      <p className="text-sm text-muted-foreground mb-3">{description}</p>
+
+      {features && features.length > 0 && (
+        <div className="mt-3 pt-3 border-t border-border/50">
+          <p className="text-xs font-semibold text-primary mb-2 uppercase tracking-wide">
+            What changes:
+          </p>
+          <ul className="space-y-1">
+            {features.map((feature, index) => (
+              <li key={index} className="text-xs text-muted-foreground flex items-center gap-2">
+                <span className="w-1 h-1 rounded-full bg-primary shrink-0" />
+                {feature}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {selected && (
+        <div className="mt-3 pt-3 border-t border-primary/20">
+          <p className="text-xs text-primary font-medium flex items-center gap-1">
+            <Check className="w-3 h-3" />
+            Active — changes applied site-wide
+          </p>
+        </div>
+      )}
+    </motion.button>
   );
 }

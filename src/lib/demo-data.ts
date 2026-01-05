@@ -1,42 +1,102 @@
 // Demo data for guest mode and initial seeding
+// Using REAL disability terminology for clarity and respect
 
 export const SUPPORT_MODE_INFO = {
-  focus_support: {
-    label: 'Focus Support',
-    description: 'For those who benefit from shorter sessions, clear next actions, and quick wins',
-    icon: '🎯',
-  },
-  reading_support: {
-    label: 'Reading Support',
-    description: 'Larger text, increased spacing, and content chunked into digestible sections',
+  dyslexia: {
+    label: 'Dyslexia',
+    subtitle: 'Have trouble reading text?',
+    description: 'Reading feels easier with the right formatting',
     icon: '📖',
+    features: [
+      'Dyslexia-friendly font (OpenDyslexic)',
+      'Wider letter & line spacing',
+      'Shorter line width for easier tracking',
+      'Content shown one section at a time',
+      'Simplified AI tutor explanations',
+    ],
   },
-  routine_low_overwhelm: {
-    label: 'Routine & Low Overwhelm',
-    description: 'Consistent layouts, fewer choices, and predictable transitions',
-    icon: '🧘',
-  },
-  step_by_step_math: {
-    label: 'Step-by-step Math',
-    description: 'Math problems broken into visual steps with no time pressure',
-    icon: '🔢',
+  adhd: {
+    label: 'ADHD',
+    subtitle: 'Struggle to stay focused or get started?',
+    description: 'Tools to help you start and maintain focus',
+    icon: '🎯',
+    features: [
+      'Prominent "Start 10 min focus" button',
+      'Tasks broken into micro-steps',
+      'Pomodoro-style focus timers',
+      'Minimal clutter, clear next action',
+      'Streaks & XP for motivation',
+    ],
   },
   sensory_safe: {
-    label: 'Sensory-Safe Mode',
-    description: 'No flashing, minimal animations, calm and static interface',
+    label: 'Sensory Sensitivity',
+    subtitle: 'Sensitive to light, motion, or stimulation?',
+    description: 'Includes epilepsy-safe design principles',
     icon: '✨',
+    features: [
+      'No flashing or rapid color changes',
+      'All animations removed',
+      'Soft, muted colors throughout',
+      'No sound or audio alerts',
+      'Calm, static interface',
+    ],
   },
-  motor_friendly: {
-    label: 'Motor-Friendly UI',
-    description: 'Larger buttons, no drag-and-drop, easy-to-reach controls',
+  autism: {
+    label: 'Autism',
+    subtitle: 'Prefer routine and predictability?',
+    description: 'Consistent patterns you can rely on',
+    icon: '🧩',
+    features: [
+      'Fixed, consistent layout positions',
+      'Reduced choices (max 3 tasks)',
+      'No surprise popups or changes',
+      'Smooth, predictable transitions',
+      'Same order every day',
+    ],
+  },
+  dyscalculia: {
+    label: 'Dyscalculia',
+    subtitle: 'Math feels overwhelming?',
+    description: 'Step-by-step math without time pressure',
+    icon: '🔢',
+    features: [
+      'One math step at a time',
+      'Visual grouping for numbers',
+      'No timed math problems',
+      'Clear step labels (Step 1, Step 2...)',
+      'Simplified number presentation',
+    ],
+  },
+  motor_difficulties: {
+    label: 'Motor Difficulties',
+    subtitle: 'Need larger touch targets?',
+    description: 'Easier to tap, no drag-and-drop',
     icon: '👆',
+    features: [
+      'Extra-large buttons & touch targets',
+      'No drag-and-drop interactions',
+      'Buttons positioned for easy reach',
+      'Simple up/down controls',
+      'No precision movements required',
+    ],
   },
-  energy_mode: {
-    label: 'Energy Mode',
-    description: 'Adapts task load and pacing based on your daily energy level',
+  chronic_fatigue: {
+    label: 'Chronic Fatigue / Energy Issues',
+    subtitle: 'Energy varies day to day?',
+    description: 'Adapts to how you feel today',
     icon: '⚡',
+    features: [
+      'Daily energy check-in',
+      'Fewer tasks on low-energy days',
+      'Shorter default sessions when tired',
+      '"Minimum viable progress" messaging',
+      'No guilt, just what works',
+    ],
   },
 };
+
+// Type for the support modes
+export type SupportModeKey = keyof typeof SUPPORT_MODE_INFO;
 
 export const BOARDS = ['CBSE', 'IGCSE'] as const;
 
@@ -124,4 +184,71 @@ export function generateDailyTasks(
   }
   
   return tasks;
+}
+
+// AI Tutor system prompts based on disability modes
+export function getAITutorSystemPrompt(modes: SupportModeKey[]): string {
+  let basePrompt = `You are NeuroStudy AI Tutor, a helpful and patient educational assistant. `;
+  
+  if (modes.includes('dyslexia')) {
+    basePrompt += `
+IMPORTANT - DYSLEXIA ADAPTATIONS:
+- Use SHORT sentences only (max 10-12 words each)
+- Break explanations into bullet points
+- Use simple, common words
+- Avoid long paragraphs (max 2-3 sentences per paragraph)
+- Use lots of spacing between ideas
+- Explain concepts step by step
+- Use analogies and real-world examples`;
+  }
+  
+  if (modes.includes('adhd')) {
+    basePrompt += `
+IMPORTANT - ADHD ADAPTATIONS:
+- Start with the KEY POINT immediately
+- Keep responses SHORT and punchy
+- Use action words: "Do this", "Try this"
+- Add encouraging phrases
+- Break everything into small steps
+- End with a clear "NEXT ACTION" the student can take right now
+- Use emojis sparingly for engagement 🎯`;
+  }
+  
+  if (modes.includes('sensory_safe')) {
+    basePrompt += `
+IMPORTANT - SENSORY-SAFE ADAPTATIONS:
+- Use calm, neutral language
+- Avoid exclamation marks and caps
+- Keep tone gentle and steady
+- No overwhelming lists
+- Simple, clear structure
+- Minimal use of emojis`;
+  }
+  
+  if (modes.includes('dyscalculia')) {
+    basePrompt += `
+IMPORTANT - DYSCALCULIA ADAPTATIONS:
+- Break math into VERY small steps
+- Show only ONE step at a time
+- Use visual grouping (parentheses, spacing)
+- Avoid mental math - show everything written out
+- Use concrete examples before abstract concepts
+- No time pressure language`;
+  }
+  
+  if (modes.includes('autism')) {
+    basePrompt += `
+IMPORTANT - AUTISM ADAPTATIONS:
+- Be LITERAL and precise
+- Avoid idioms and figures of speech
+- Consistent formatting every time
+- Clear, predictable structure
+- State expectations explicitly`;
+  }
+  
+  basePrompt += `
+
+Always be encouraging, never condescending. Meet the student where they are.`;
+  
+  return basePrompt;
 }
