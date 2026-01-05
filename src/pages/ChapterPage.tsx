@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useMode } from '@/contexts/ModeContext';
@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AITutor } from '@/components/AITutor';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   ArrowLeft, 
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 import { generateMicroSteps } from '@/lib/demo-data';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface Chapter {
   id: string;
@@ -124,7 +126,7 @@ export default function ChapterPage() {
         subject_name: (chapter.subjects as any)?.name,
         estimated_minutes: experienceProfile.defaultTimerMinutes,
         status: 'pending',
-        order_index: 99, // Will be at the end
+        order_index: 99,
         micro_steps: generateMicroSteps(
           chapter.title,
           experienceProfile.microStepsGranularity === 'detailed'
@@ -173,7 +175,11 @@ export default function ChapterPage() {
   
   const currentQuestion = questions[currentQuestionIndex];
   const isCorrect = selectedAnswer === currentQuestion?.correct_answer;
-  const showMathStepMode = hasMode('step_by_step_math') && currentQuestion?.is_math && currentQuestion?.math_steps?.length > 0;
+  const showMathStepMode = hasMode('dyscalculia') && currentQuestion?.is_math && currentQuestion?.math_steps?.length > 0;
+
+  // Dyslexia mode styling
+  const isDyslexiaMode = hasMode('dyslexia');
+  const readingContentClass = isDyslexiaMode ? 'reading-content' : '';
 
   if (loading) {
     return (
@@ -220,12 +226,33 @@ export default function ChapterPage() {
                 {(chapter.subjects as any)?.name} • {chapter.board} Grade {chapter.grade}
               </p>
             </div>
-            <Button onClick={addToTodaysPlan}>
+            <Button onClick={addToTodaysPlan} className={hasMode('adhd') ? 'quick-start-btn' : ''}>
               <Play className="w-4 h-4 mr-2" />
               Add to Today
             </Button>
           </div>
         </motion.div>
+
+        {/* Mode indicator */}
+        {(isDyslexiaMode || hasMode('sensory_safe') || hasMode('adhd')) && (
+          <div className="flex gap-2 flex-wrap">
+            {isDyslexiaMode && (
+              <Badge variant="outline" className="bg-primary/5">
+                📖 Dyslexia-friendly view active
+              </Badge>
+            )}
+            {hasMode('sensory_safe') && (
+              <Badge variant="outline" className="bg-primary/5">
+                ✨ Sensory-safe mode active
+              </Badge>
+            )}
+            {hasMode('adhd') && (
+              <Badge variant="outline" className="bg-primary/5">
+                🎯 ADHD focus mode active
+              </Badge>
+            )}
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-2 border-b">
@@ -239,11 +266,13 @@ export default function ChapterPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-3 border-b-2 transition-colors ${
+                className={cn(
+                  "flex items-center gap-2 px-4 py-3 border-b-2 transition-colors",
                   activeTab === tab.id
                     ? 'border-primary text-primary'
-                    : 'border-transparent text-muted-foreground hover:text-foreground'
-                }`}
+                    : 'border-transparent text-muted-foreground hover:text-foreground',
+                  experienceProfile.largeButtons && "px-6 py-4"
+                )}
               >
                 <Icon className="w-4 h-4" />
                 {tab.label}
@@ -261,15 +290,16 @@ export default function ChapterPage() {
         >
           {activeTab === 'summary' && (
             <Card>
-              <CardContent className="p-6">
+              <CardContent className={cn("p-6", readingContentClass)}>
                 {experienceProfile.readingMode.oneSectionAtATime ? (
                   <div className="space-y-4">
                     <div 
-                      className={`reading-chunk ${
-                        experienceProfile.readingMode.highlightCurrent ? 'highlight-current' : ''
-                      }`}
+                      className={cn(
+                        "reading-chunk",
+                        experienceProfile.readingMode.highlightCurrent && "highlight-current"
+                      )}
                     >
-                      <p className={experienceProfile.readingMode.largeFont ? 'text-lg leading-relaxed' : ''}>
+                      <p className={isDyslexiaMode ? '' : experienceProfile.readingMode.largeFont ? 'text-lg leading-relaxed' : ''}>
                         {summarySections[currentSection]}.
                       </p>
                     </div>
@@ -277,7 +307,7 @@ export default function ChapterPage() {
                     <div className="flex items-center justify-between pt-4 border-t">
                       <Button
                         variant="outline"
-                        size="sm"
+                        size={experienceProfile.largeButtons ? "lg" : "sm"}
                         onClick={() => setCurrentSection(prev => Math.max(0, prev - 1))}
                         disabled={currentSection === 0}
                       >
@@ -289,7 +319,7 @@ export default function ChapterPage() {
                       </span>
                       <Button
                         variant="outline"
-                        size="sm"
+                        size={experienceProfile.largeButtons ? "lg" : "sm"}
                         onClick={() => setCurrentSection(prev => Math.min(summarySections.length - 1, prev + 1))}
                         disabled={currentSection === summarySections.length - 1}
                       >
@@ -299,11 +329,11 @@ export default function ChapterPage() {
                     </div>
                   </div>
                 ) : (
-                  <p className={`${
-                    experienceProfile.readingMode.largeFont ? 'text-lg' : ''
-                  } ${
-                    experienceProfile.readingMode.increasedSpacing ? 'leading-loose' : 'leading-relaxed'
-                  }`}>
+                  <p className={cn(
+                    !isDyslexiaMode && experienceProfile.readingMode.largeFont && 'text-lg',
+                    !isDyslexiaMode && experienceProfile.readingMode.increasedSpacing && 'leading-loose',
+                    !isDyslexiaMode && 'leading-relaxed'
+                  )}>
                     {chapter.summary}
                   </p>
                 )}
@@ -313,17 +343,18 @@ export default function ChapterPage() {
 
           {activeTab === 'keypoints' && (
             <Card>
-              <CardContent className="p-6">
+              <CardContent className={cn("p-6", readingContentClass)}>
                 <ul className="space-y-4">
                   {chapter.key_points?.map((point, index) => (
                     <li
                       key={index}
-                      className={`flex items-start gap-3 ${
-                        experienceProfile.readingMode.largeFont ? 'text-lg' : ''
-                      }`}
+                      className={cn(
+                        "flex items-start gap-3",
+                        isDyslexiaMode && "p-3 rounded-lg bg-muted/30"
+                      )}
                     >
-                      <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <span className="text-xs font-bold text-primary">{index + 1}</span>
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-sm font-bold text-primary">{index + 1}</span>
                       </div>
                       <span>{point}</span>
                     </li>
@@ -352,12 +383,16 @@ export default function ChapterPage() {
                         <Badge variant="secondary">Math</Badge>
                       )}
                     </div>
+                    {hasMode('dyscalculia') && currentQuestion?.is_math && (
+                      <p className="text-sm text-primary">Step-by-step mode active • No time pressure</p>
+                    )}
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {/* Question */}
-                    <p className={`font-medium ${
-                      experienceProfile.readingMode.largeFont ? 'text-xl' : 'text-lg'
-                    }`}>
+                    <p className={cn(
+                      "font-medium",
+                      isDyslexiaMode ? '' : 'text-lg'
+                    )}>
                       {currentQuestion?.question_text}
                     </p>
 
@@ -379,7 +414,7 @@ export default function ChapterPage() {
                         {currentMathStep < currentQuestion.math_steps.length - 1 && (
                           <Button
                             variant="outline"
-                            size="sm"
+                            size={experienceProfile.largeButtons ? "lg" : "sm"}
                             onClick={() => setCurrentMathStep(prev => prev + 1)}
                           >
                             Show next step
@@ -396,7 +431,8 @@ export default function ChapterPage() {
                             key={index}
                             onClick={() => !showResult && setSelectedAnswer(option)}
                             disabled={showResult}
-                            className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
+                            className={cn(
+                              "w-full p-4 text-left rounded-lg border-2 transition-all",
                               showResult
                                 ? option === currentQuestion.correct_answer
                                   ? 'border-success bg-success/10'
@@ -405,8 +441,9 @@ export default function ChapterPage() {
                                   : 'border-border'
                                 : selectedAnswer === option
                                 ? 'border-primary bg-primary/10'
-                                : 'border-border hover:border-primary/50'
-                            } ${experienceProfile.largeButtons ? 'min-h-[56px]' : ''}`}
+                                : 'border-border hover:border-primary/50',
+                              experienceProfile.largeButtons && 'min-h-[60px] text-lg'
+                            )}
                           >
                             <div className="flex items-center justify-between">
                               <span>{option}</span>
@@ -426,6 +463,7 @@ export default function ChapterPage() {
                     <div className="flex items-center justify-between pt-4 border-t">
                       <Button
                         variant="outline"
+                        size={experienceProfile.largeButtons ? "lg" : "default"}
                         onClick={prevQuestion}
                         disabled={currentQuestionIndex === 0}
                       >
@@ -435,13 +473,17 @@ export default function ChapterPage() {
                       
                       {!showResult ? (
                         <Button
+                          size={experienceProfile.largeButtons ? "lg" : "default"}
                           onClick={checkAnswer}
                           disabled={!selectedAnswer}
                         >
                           Check Answer
                         </Button>
                       ) : (
-                        <Button onClick={nextQuestion}>
+                        <Button
+                          size={experienceProfile.largeButtons ? "lg" : "default"}
+                          onClick={nextQuestion}
+                        >
                           {currentQuestionIndex === questions.length - 1 ? 'Finish' : 'Next'}
                           <ChevronRight className="w-4 h-4 ml-1" />
                         </Button>
@@ -454,6 +496,15 @@ export default function ChapterPage() {
           )}
         </motion.div>
       </div>
+
+      {/* AI Tutor */}
+      <AITutor 
+        chapterContext={{
+          title: chapter.title,
+          summary: chapter.summary || '',
+          keyPoints: chapter.key_points || [],
+        }}
+      />
     </AppLayout>
   );
 }

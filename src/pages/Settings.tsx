@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useMode, SupportMode } from '@/contexts/ModeContext';
+import { useMode } from '@/contexts/ModeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ModeCard } from '@/components/ui/mode-card';
 import { supabase } from '@/integrations/supabase/client';
-import { SUPPORT_MODE_INFO, TIMER_PRESETS } from '@/lib/demo-data';
+import { SUPPORT_MODE_INFO, TIMER_PRESETS, SupportModeKey } from '@/lib/demo-data';
 import { useToast } from '@/hooks/use-toast';
 import { Save, RefreshCw } from 'lucide-react';
+
+// Order modes to show primary ones first
+const MODE_ORDER: SupportModeKey[] = ['dyslexia', 'adhd', 'sensory_safe', 'autism', 'dyscalculia', 'motor_difficulties', 'chronic_fatigue'];
 
 export default function Settings() {
   const { preferences, setPreferences, hasMode, updateMode, isGuestMode } = useMode();
@@ -28,8 +30,22 @@ export default function Settings() {
 
     if (!isGuestMode && user) {
       try {
+        // Map new mode keys to database enum values
+        const dbModes = preferences.selectedModes.map(mode => {
+          const mapping: Record<string, string> = {
+            'dyslexia': 'reading_support',
+            'adhd': 'focus_support',
+            'autism': 'routine_low_overwhelm',
+            'dyscalculia': 'step_by_step_math',
+            'sensory_safe': 'sensory_safe',
+            'motor_difficulties': 'motor_friendly',
+            'chronic_fatigue': 'energy_mode',
+          };
+          return mapping[mode] || mode;
+        });
+
         await supabase.from('profiles').update({
-          selected_modes: preferences.selectedModes,
+          selected_modes: dbModes as any,
           timer_preset: preferences.timerPreset,
           reading_large_font: preferences.readingLargeFont,
           reading_increased_spacing: preferences.readingIncreasedSpacing,
@@ -85,25 +101,28 @@ export default function Settings() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Support Modes</CardTitle>
+              <CardTitle>Disability & Support Modes</CardTitle>
               <CardDescription>
-                Select the ways you'd like the app to adapt to your needs
+                Select the ways you'd like the app to adapt. Each mode changes how the entire app looks and works.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(Object.entries(SUPPORT_MODE_INFO) as [SupportMode, typeof SUPPORT_MODE_INFO[SupportMode]][]).map(
-                  ([mode, info]) => (
+                {MODE_ORDER.map(mode => {
+                  const info = SUPPORT_MODE_INFO[mode];
+                  return (
                     <ModeCard
                       key={mode}
                       icon={info.icon}
                       label={info.label}
+                      subtitle={info.subtitle}
                       description={info.description}
+                      features={info.features}
                       selected={hasMode(mode)}
                       onToggle={() => updateMode(mode, !hasMode(mode))}
                     />
-                  )
-                )}
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
@@ -143,8 +162,8 @@ export default function Settings() {
           </Card>
         </motion.div>
 
-        {/* Reading Settings */}
-        {hasMode('reading_support') && (
+        {/* Dyslexia/Reading Settings */}
+        {hasMode('dyslexia') && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -152,28 +171,12 @@ export default function Settings() {
           >
             <Card>
               <CardHeader>
-                <CardTitle>Reading Display</CardTitle>
+                <CardTitle>📖 Dyslexia Settings</CardTitle>
                 <CardDescription>
-                  Adjust how text content is displayed
+                  Font and spacing are already optimized. Fine-tune below:
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="large-font">Larger text</Label>
-                  <Switch
-                    id="large-font"
-                    checked={preferences.readingLargeFont}
-                    onCheckedChange={v => updatePreference('readingLargeFont', v)}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="spacing">Increased spacing</Label>
-                  <Switch
-                    id="spacing"
-                    checked={preferences.readingIncreasedSpacing}
-                    onCheckedChange={v => updatePreference('readingIncreasedSpacing', v)}
-                  />
-                </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="one-section">One section at a time</Label>
                   <Switch
@@ -204,20 +207,12 @@ export default function Settings() {
           >
             <Card>
               <CardHeader>
-                <CardTitle>Sensory Settings</CardTitle>
+                <CardTitle>✨ Sensory-Safe Settings</CardTitle>
                 <CardDescription>
-                  Control animations and sounds
+                  Animations and bright colors are already disabled.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="reduce-motion">Reduce motion</Label>
-                  <Switch
-                    id="reduce-motion"
-                    checked={preferences.sensoryReduceMotion}
-                    onCheckedChange={v => updatePreference('sensoryReduceMotion', v)}
-                  />
-                </div>
                 <div className="flex items-center justify-between">
                   <Label htmlFor="sound-off">Sound off</Label>
                   <Switch
@@ -232,7 +227,7 @@ export default function Settings() {
         )}
 
         {/* Motor Settings */}
-        {hasMode('motor_friendly') && (
+        {hasMode('motor_difficulties') && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -240,14 +235,14 @@ export default function Settings() {
           >
             <Card>
               <CardHeader>
-                <CardTitle>Motor Accessibility</CardTitle>
+                <CardTitle>👆 Motor Accessibility</CardTitle>
                 <CardDescription>
-                  Make controls easier to use
+                  Larger buttons and touch targets are already enabled.
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="large-buttons">Large buttons and targets</Label>
+                  <Label htmlFor="large-buttons">Extra large buttons</Label>
                   <Switch
                     id="large-buttons"
                     checked={preferences.motorLargeButtons}

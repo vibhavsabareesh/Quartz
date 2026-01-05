@@ -1,18 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { SupportModeKey } from '@/lib/demo-data';
 
-export type SupportMode = 
-  | 'focus_support'
-  | 'reading_support'
-  | 'routine_low_overwhelm'
-  | 'step_by_step_math'
-  | 'sensory_safe'
-  | 'motor_friendly'
-  | 'energy_mode';
+// Export for backwards compatibility
+export type SupportMode = SupportModeKey;
 
 export type EnergyLevel = 'low' | 'normal' | 'high';
 
 export interface UserPreferences {
-  selectedModes: SupportMode[];
+  selectedModes: SupportModeKey[];
   timerPreset: 10 | 25 | 45;
   readingLargeFont: boolean;
   readingIncreasedSpacing: boolean;
@@ -41,16 +36,27 @@ export interface ExperienceProfile {
   reducedChoices: boolean;
   consistentLayout: boolean;
   
-  // Reading adjustments
+  // Reading adjustments (for dyslexia)
   readingMode: {
     largeFont: boolean;
     increasedSpacing: boolean;
     oneSectionAtATime: boolean;
     highlightCurrent: boolean;
+    dyslexiaFont: boolean;
+  };
+  
+  // Sensory adjustments
+  sensoryMode: {
+    reduceMotion: boolean;
+    mutedColors: boolean;
+    noFlashing: boolean;
   };
   
   // Energy-based messaging
   energyMessage: string;
+  
+  // Active modes for AI tutor
+  activeModes: SupportModeKey[];
 }
 
 interface ModeContextType {
@@ -59,8 +65,8 @@ interface ModeContextType {
   energyLevel: EnergyLevel;
   setEnergyLevel: (level: EnergyLevel) => void;
   experienceProfile: ExperienceProfile;
-  hasMode: (mode: SupportMode) => boolean;
-  updateMode: (mode: SupportMode, enabled: boolean) => void;
+  hasMode: (mode: SupportModeKey) => boolean;
+  updateMode: (mode: SupportModeKey, enabled: boolean) => void;
   isGuestMode: boolean;
   setIsGuestMode: (value: boolean) => void;
 }
@@ -101,9 +107,9 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('neuro-study-energy-today', energyLevel);
   }, [energyLevel]);
 
-  const hasMode = (mode: SupportMode) => preferences.selectedModes.includes(mode);
+  const hasMode = (mode: SupportModeKey) => preferences.selectedModes.includes(mode);
 
-  const updateMode = (mode: SupportMode, enabled: boolean) => {
+  const updateMode = (mode: SupportModeKey, enabled: boolean) => {
     setPreferences(prev => ({
       ...prev,
       selectedModes: enabled
@@ -115,47 +121,53 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
   // Compute experience profile based on modes and energy
   const experienceProfile = useMemo<ExperienceProfile>(() => {
     const modes = preferences.selectedModes;
-    const hasFocus = modes.includes('focus_support');
-    const hasReading = modes.includes('reading_support');
-    const hasRoutine = modes.includes('routine_low_overwhelm');
-    const hasMath = modes.includes('step_by_step_math');
+    const hasDyslexia = modes.includes('dyslexia');
+    const hasADHD = modes.includes('adhd');
+    const hasAutism = modes.includes('autism');
+    const hasDyscalculia = modes.includes('dyscalculia');
     const hasSensory = modes.includes('sensory_safe');
-    const hasMotor = modes.includes('motor_friendly');
-    const hasEnergy = modes.includes('energy_mode');
+    const hasMotor = modes.includes('motor_difficulties');
+    const hasFatigue = modes.includes('chronic_fatigue');
 
     // Calculate default timer
     let defaultTimer: number = preferences.timerPreset;
-    if (hasFocus && energyLevel !== 'low') {
+    if (hasADHD && energyLevel !== 'low') {
       defaultTimer = 25;
     }
-    if (energyLevel === 'low') {
+    if (energyLevel === 'low' || hasFatigue) {
       defaultTimer = Math.min(defaultTimer, 15);
     }
-    if (energyLevel === 'high') {
+    if (energyLevel === 'high' && !hasFatigue) {
       defaultTimer = Math.max(defaultTimer, 45);
     }
 
     // Calculate max tasks
     let maxTasks = 5;
-    if (energyLevel === 'low') maxTasks = 2;
-    if (energyLevel === 'high') maxTasks = 6;
-    if (hasRoutine && maxTasks > 3) maxTasks = 3;
+    if (energyLevel === 'low' || hasFatigue) maxTasks = 2;
+    if (energyLevel === 'high' && !hasFatigue) maxTasks = 6;
+    if (hasAutism && maxTasks > 3) maxTasks = 3;
 
-    // Build body classes
+    // Build body classes for global CSS changes
     const bodyClasses: string[] = [];
     if (hasSensory || preferences.sensoryReduceMotion) {
       bodyClasses.push('sensory-safe');
     }
-    if (hasReading) {
-      bodyClasses.push('reading-support');
+    if (hasDyslexia) {
+      bodyClasses.push('dyslexia-mode');
     }
     if (hasMotor || preferences.motorLargeButtons) {
       bodyClasses.push('motor-friendly');
     }
+    if (hasADHD) {
+      bodyClasses.push('adhd-mode');
+    }
+    if (hasAutism) {
+      bodyClasses.push('autism-mode');
+    }
 
     // Energy messages
     let energyMessage = "You've got this!";
-    if (energyLevel === 'low') {
+    if (energyLevel === 'low' || hasFatigue) {
       energyMessage = "Minimum viable progress is enough today. Be gentle with yourself.";
     } else if (energyLevel === 'high') {
       energyMessage = "Feeling energetic! Let's make great progress.";
@@ -164,22 +176,29 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
     return {
       defaultTimerMinutes: defaultTimer,
       maxTasksToday: maxTasks,
-      showQuickStart: hasFocus,
-      microStepsGranularity: hasFocus ? 'detailed' : 'normal',
-      showEndingSoonBanner: hasRoutine,
-      untimed: hasMath,
-      mathStepMode: hasMath,
+      showQuickStart: hasADHD,
+      microStepsGranularity: hasADHD ? 'detailed' : 'normal',
+      showEndingSoonBanner: hasAutism,
+      untimed: hasDyscalculia,
+      mathStepMode: hasDyscalculia,
       bodyClasses,
       largeButtons: hasMotor || preferences.motorLargeButtons,
-      reducedChoices: hasRoutine,
-      consistentLayout: hasRoutine,
+      reducedChoices: hasAutism,
+      consistentLayout: hasAutism,
       readingMode: {
-        largeFont: hasReading || preferences.readingLargeFont,
-        increasedSpacing: hasReading || preferences.readingIncreasedSpacing,
-        oneSectionAtATime: hasReading || preferences.readingOneSectionAtATime,
+        largeFont: hasDyslexia || preferences.readingLargeFont,
+        increasedSpacing: hasDyslexia || preferences.readingIncreasedSpacing,
+        oneSectionAtATime: hasDyslexia || preferences.readingOneSectionAtATime,
         highlightCurrent: preferences.readingHighlightCurrent,
+        dyslexiaFont: hasDyslexia,
+      },
+      sensoryMode: {
+        reduceMotion: hasSensory || preferences.sensoryReduceMotion,
+        mutedColors: hasSensory,
+        noFlashing: hasSensory,
       },
       energyMessage,
+      activeModes: modes,
     };
   }, [preferences, energyLevel]);
 
@@ -187,7 +206,7 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const body = document.body;
     // Remove all mode classes first
-    body.classList.remove('sensory-safe', 'reading-support', 'motor-friendly');
+    body.classList.remove('sensory-safe', 'dyslexia-mode', 'motor-friendly', 'adhd-mode', 'autism-mode');
     // Add new classes
     experienceProfile.bodyClasses.forEach(cls => body.classList.add(cls));
   }, [experienceProfile.bodyClasses]);
