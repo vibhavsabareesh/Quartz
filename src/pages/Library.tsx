@@ -12,7 +12,7 @@ import {
   BookOpen, 
   ChevronRight, 
   Search,
-  Filter
+  FileText
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -104,8 +104,18 @@ export default function Library() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <h1 className="text-2xl font-bold text-foreground mb-2">Content Library</h1>
-          <p className="text-muted-foreground">Browse chapters and study materials</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground mb-2">Content Library</h1>
+              <p className="text-muted-foreground">Browse chapters and study materials</p>
+            </div>
+            <Button asChild variant="outline" className="gap-2">
+              <Link to="/notes">
+                <FileText className="w-4 h-4" />
+                Notes Generator
+              </Link>
+            </Button>
+          </div>
         </motion.div>
 
         {/* Filters */}
