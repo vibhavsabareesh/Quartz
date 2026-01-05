@@ -16,6 +16,7 @@ import Library from "./pages/Library";
 import ChapterPage from "./pages/ChapterPage";
 import Progress from "./pages/Progress";
 import Settings from "./pages/Settings";
+import NotesGenerator from "./pages/NotesGenerator";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/chapter/:chapterId" element={<ChapterPage />} />
               <Route path="/progress" element={<Progress />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/notes" element={<NotesGenerator />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
