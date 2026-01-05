@@ -20,6 +20,36 @@ serve(async (req) => {
       );
     }
 
+    // Protect the model from extremely large inputs that exceed provider limits.
+    const MAX_INPUT_CHARS = 350_000;
+    const truncateForModel = (raw: string) => {
+      const trimmed = raw.trim();
+      if (trimmed.length <= MAX_INPUT_CHARS) {
+        return { text: trimmed, truncated: false, originalLength: trimmed.length };
+      }
+
+      // Keep the start + end of the document (often contains headings + conclusions).
+      const marker = '\n\n[... content truncated due to size ...]\n\n';
+      const budget = Math.max(0, MAX_INPUT_CHARS - marker.length);
+      const head = Math.floor(budget * 0.7);
+      const tail = budget - head;
+
+      return {
+        text: trimmed.slice(0, head) + marker + trimmed.slice(-tail),
+        truncated: true,
+        originalLength: trimmed.length,
+      };
+    };
+
+    const { text: safeContent, truncated, originalLength } = truncateForModel(content);
+    if (truncated) {
+      console.log(
+        `summarize-notes: input truncated from ${originalLength} chars to ${safeContent.length} chars to fit provider limits.`
+      );
+    } else {
+      console.log(`summarize-notes: input length ${originalLength} chars.`);
+    }
+
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY is not configured');
@@ -63,7 +93,9 @@ You must respond with valid JSON in this exact format:
   }
 }
 
-If there are no action items, return an empty array for actionItems.`;
+If there are no action items, return an empty array for actionItems.
+
+If the provided content is clearly an excerpt (truncated), mention this briefly in the summary.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -75,7 +107,15 @@ If there are no action items, return an empty array for actionItems.`;
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Please summarize and create notes from the following content:\n\n${content}` }
+          {
+            role: 'user',
+            content:
+              `Please summarize and create notes from the following content.\n` +
+              (truncated
+                ? `NOTE: The content was truncated due to size. Summarize based on the excerpt and mention it's partial.\n\n`
+                : `\n`) +
+              safeContent,
+          },
         ],
         temperature: 0.3,
       }),
@@ -84,7 +124,7 @@ If there are no action items, return an empty array for actionItems.`;
     if (!response.ok) {
       const errorText = await response.text();
       console.error('AI Gateway error:', response.status, errorText);
-      
+
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
@@ -97,8 +137,23 @@ If there are no action items, return an empty array for actionItems.`;
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      
-      throw new Error(`AI Gateway error: ${response.status}`);
+
+      // Provider commonly returns a 400 when the prompt is too large.
+      const tokenLimitHit =
+        response.status === 400 &&
+        /token count exceeds|maximum number of tokens/i.test(errorText);
+
+      if (tokenLimitHit) {
+        return new Response(
+          JSON.stringify({
+            error:
+              'This file is too large to summarize at once. Please upload a smaller file or split the content into multiple parts.',
+          }),
+          { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      throw new Error(`AI Gateway error: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();
