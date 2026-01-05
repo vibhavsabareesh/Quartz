@@ -107,7 +107,7 @@ export default function Home() {
         },
       ];
       setTasks(demoTasks.slice(0, experienceProfile.maxTasksToday));
-      setProgress({ total_xp: 150, current_streak: 3, total_focused_minutes: 120, total_sessions_completed: 8 });
+      setProgress({ total_xp: 0, current_streak: 0, total_focused_minutes: 0, total_sessions_completed: 0 });
       setLoading(false);
       return;
     }

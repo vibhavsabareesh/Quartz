@@ -47,12 +47,12 @@ export default function ProgressPage() {
     
     if (isGuestMode) {
       setProgress({
-        total_xp: 250,
-        current_streak: 5,
-        longest_streak: 7,
-        total_focused_minutes: 180,
-        total_sessions_completed: 12,
-        badges: ['first_session', 'streak_3'],
+        total_xp: 0,
+        current_streak: 0,
+        longest_streak: 0,
+        total_focused_minutes: 0,
+        total_sessions_completed: 0,
+        badges: [],
       });
       setLoading(false);
       return;
