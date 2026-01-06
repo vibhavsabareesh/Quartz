@@ -1,4 +1,4 @@
-# Quartz 
+# Quartz 💎
 
 **Adaptive learning for every mind.**
 
@@ -31,24 +31,26 @@ Students can combine multiple modes, and preferences are fine-tuned further in s
 
 ## Key Features
 
-###  Focus Sessions
+### 🎯 Focus Sessions
 Pomodoro-style focus timer with a visual coffee cup that empties as time passes. Includes work/break cycles, session tracking, and anti-distraction features.
 
-###  CBSE Curriculum Library
+### 📚 CBSE Curriculum Library
 Pre-loaded content for Classes 6-12 across Mathematics, Science, English, Social Studies, and Computer Science. Chapters include summaries, key points, and flashcards.
 
-###  AI Tutor
+### 🤖 AI Tutor
 Context-aware AI assistant that adapts its communication style based on selected modes. Dyslexia mode gets short sentences and simple words. ADHD mode gets punchy responses with clear next actions.
 
-###  Progress Tracking
+### 📊 Progress Tracking
 XP system, streaks, focused minutes, and session history. Badges for milestones like first session, 7-day streaks, and 5 hours of focus time.
 
-###  Energy-Aware Scheduling
+### ⚡ Energy-Aware Scheduling
 For students with chronic fatigue or variable energy, a daily check-in adjusts the number of tasks and session lengths automatically.
 
 ---
 
 ## Technical Overview
+
+> 📖 **New to the codebase?** Read [ARCHITECTURE.md](ARCHITECTURE.md) for a guided walkthrough of files in order of importance.
 
 ### Tech Stack
 
@@ -149,7 +151,7 @@ if (modes.includes('adhd')) {
 
 ### Prerequisites
 
-- Node.js (install via [nvm](https://github.com/nvm-sh/nvm))
+- Node.js 18+ (install via [nvm](https://github.com/nvm-sh/nvm))
 - A Supabase project (for auth and database)
 
 ### Installation
@@ -183,7 +185,7 @@ You can explore the app without an account using Guest Mode. Select "Try as Gues
 
 ---
 
-## Roadmap (Future Plans)
+## Roadmap
 
 - [ ] Additional curriculum support (IGCSE, State Boards)
 - [ ] Parent/teacher dashboard for progress monitoring
@@ -194,7 +196,9 @@ You can explore the app without an account using Guest Mode. Select "Try as Gues
 
 ---
 
+## License
 
+MIT
 
 ---
 
