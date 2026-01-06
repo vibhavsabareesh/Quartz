@@ -20,12 +20,14 @@ import {
   ChevronLeft,
   Check,
   X,
-  Filter
+  Filter,
+  Layers
 } from 'lucide-react';
 import { generateMicroSteps } from '@/lib/demo-data';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FlashcardDeck } from '@/components/FlashcardDeck';
 
 interface Chapter {
   id: string;
@@ -48,6 +50,12 @@ interface PracticeQuestion {
   level?: number;
   skills?: string[];
   // correct_answer is NOT included - it's validated server-side
+}
+
+interface Flashcard {
+  id: string;
+  front: string;
+  back: string;
 }
 
 interface AnswerResult {
@@ -73,7 +81,8 @@ export default function ChapterPage() {
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const [questions, setQuestions] = useState<PracticeQuestion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'summary' | 'keypoints' | 'practice'>('summary');
+  const [activeTab, setActiveTab] = useState<'summary' | 'keypoints' | 'flashcards' | 'practice'>('summary');
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   
   // Practice state
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -132,6 +141,16 @@ export default function ChapterPage() {
 
       if (questionsData) {
         setQuestions(questionsData as PracticeQuestion[]);
+      }
+
+      // Load flashcards
+      const { data: flashcardsData } = await supabase
+        .from('flashcards')
+        .select('id, front, back')
+        .eq('chapter_id', chapterId);
+
+      if (flashcardsData) {
+        setFlashcards(flashcardsData);
       }
     } catch (error) {
       console.error('Error loading chapter:', error);
@@ -406,11 +425,12 @@ export default function ChapterPage() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b">
+        <div className="flex gap-2 border-b overflow-x-auto">
           {[
             { id: 'summary', label: 'Summary', icon: BookOpen },
             { id: 'keypoints', label: 'Key Points', icon: Key },
-            { id: 'practice', label: 'Practice', icon: HelpCircle },
+            { id: 'flashcards', label: 'Flashcards', icon: Layers, count: flashcards.length },
+            { id: 'practice', label: 'Practice', icon: HelpCircle, count: questions.length },
           ].map(tab => {
             const Icon = tab.icon;
             return (
@@ -427,6 +447,9 @@ export default function ChapterPage() {
               >
                 <Icon className="w-4 h-4" />
                 {tab.label}
+                {'count' in tab && tab.count > 0 && (
+                  <Badge variant="secondary" className="ml-1 text-xs">{tab.count}</Badge>
+                )}
               </button>
             );
           })}
@@ -513,6 +536,10 @@ export default function ChapterPage() {
                 </ul>
               </CardContent>
             </Card>
+          )}
+
+          {activeTab === 'flashcards' && (
+            <FlashcardDeck flashcards={flashcards} />
           )}
 
           {activeTab === 'practice' && (
