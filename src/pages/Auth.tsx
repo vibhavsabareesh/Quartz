@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useOnboarding } from '@/App';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Please enter a valid email address');
@@ -23,6 +24,7 @@ export default function Auth() {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { startOnboarding } = useOnboarding();
 
   useEffect(() => {
     if (user) {
@@ -95,9 +97,10 @@ export default function Auth() {
     } else {
       toast({
         title: 'Account created!',
-        description: 'Welcome to Quartz. Let\'s set up your preferences.',
+        description: 'Welcome to Quartz. Let\'s take a quick tour!',
       });
-      navigate('/onboarding');
+      // Start the onboarding tour for new users (pass true for authenticated)
+      startOnboarding(true);
     }
   };
 
