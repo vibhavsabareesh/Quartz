@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Sparkles, Flame, Clock, Home, RotateCcw, AlertTriangle } from 'lucide-react';
+import { AddToCalendarButton } from '@/components/AddToCalendarButton';
 
 interface SessionEndState {
   completed: boolean;
@@ -107,6 +108,15 @@ export default function SessionEnd() {
 
           {/* Actions */}
           <div className="flex flex-col gap-3">
+            {completed && task && (
+              <AddToCalendarButton
+                title={`Study: ${task.title}`}
+                description={`Subject: ${task.subject_name}\nDuration: ${duration} minutes\nXP Earned: ${xpEarned}`}
+                duration={duration}
+                variant="outline"
+                className="w-full"
+              />
+            )}
             <Button onClick={() => navigate('/home')} className="w-full">
               <Home className="w-4 h-4 mr-2" />
               Back to Home
