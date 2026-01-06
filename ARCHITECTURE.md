@@ -9,7 +9,7 @@ This guide walks you through the Quartz codebase in order of importance. If you'
 These files are the heart of Quartz. They define what makes the app unique.
 
 ### `src/contexts/ModeContext.tsx`
-**The brain of the entire app.**
+
 
 This context manages:
 - User preferences (selected modes, timer settings, reading options)
