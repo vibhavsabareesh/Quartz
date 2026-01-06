@@ -28,8 +28,8 @@ export default function Welcome() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <div className="w-28 h-28 mx-auto mb-6 flex items-center justify-center">
-            <img src="/quartz-logo.png" alt="Quartz" className="w-28 h-28" />
+          <div className="w-[120px] h-[120px] mx-auto mb-6 flex items-center justify-center">
+            <img src="/quartz-logo.png" alt="Quartz" className="w-[120px] h-[120px]" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Quartz
