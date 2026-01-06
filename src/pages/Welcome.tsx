@@ -21,6 +21,8 @@ export default function Welcome() {
   const handleOnboardingComplete = () => {
     setHasCompletedOnboarding(true);
     setShowOnboarding(false);
+    // Navigate to auth page after onboarding
+    window.location.href = '/auth';
   };
 
   if (showOnboarding) {
