@@ -59,7 +59,7 @@ For students with chronic fatigue or variable energy, a daily check-in adjusts t
 - **Animation**: Framer Motion (disabled in sensory-safe mode)
 - **State Management**: React Context + TanStack Query
 - **Backend**: Supabase (Auth, PostgreSQL, Edge Functions)
-- **AI**: OpenAI API via Supabase Edge Functions
+- **AI**: Google Gemini 2.5 Flash via Lovable AI Gateway
 
 ### Project Structure
 
