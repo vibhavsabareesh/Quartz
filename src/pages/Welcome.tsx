@@ -1,10 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Brain, Heart } from 'lucide-react';
+import { OnboardingGuide } from '@/components/OnboardingGuide';
 
 export default function Welcome() {
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+
+  useEffect(() => {
+    const completed = localStorage.getItem('quartz-onboarding-complete');
+    setHasCompletedOnboarding(completed === 'true');
+  }, []);
+
+  const handleStartAsGuest = () => {
+    setShowOnboarding(true);
+  };
+
+  const handleOnboardingComplete = () => {
+    setHasCompletedOnboarding(true);
+    setShowOnboarding(false);
+  };
+
+  if (showOnboarding) {
+    return <OnboardingGuide onComplete={handleOnboardingComplete} />;
+  }
+
   return (
     <div className="min-h-screen gradient-calm flex flex-col">
       {/* Hero Section */}
@@ -66,8 +88,13 @@ export default function Welcome() {
           <Button asChild size="lg" className="text-lg px-8">
             <Link to="/auth">Get Started</Link>
           </Button>
-          <Button asChild variant="outline" size="lg" className="text-lg px-8">
-            <Link to="/library">Explore Library</Link>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            className="text-lg px-8"
+            onClick={handleStartAsGuest}
+          >
+            {hasCompletedOnboarding ? 'Continue as Guest' : 'Try as Guest'}
           </Button>
         </motion.div>
 
@@ -78,7 +105,7 @@ export default function Welcome() {
           transition={{ delay: 0.6 }}
           className="mt-6 text-sm text-muted-foreground"
         >
-          CBSE Class 9 content pre-loaded • No account needed to browse
+          CBSE Class 9 content pre-loaded • AI-guided onboarding for new users
         </motion.p>
       </div>
 

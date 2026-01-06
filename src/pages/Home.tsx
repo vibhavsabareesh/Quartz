@@ -85,6 +85,9 @@ export default function Home() {
     setLoading(true);
     
     if (isGuestMode) {
+      // Check for guest XP from onboarding
+      const guestXp = parseInt(localStorage.getItem('quartz-guest-xp') || '0', 10);
+      
       // Generate demo tasks for guest
       const demoTasks: Task[] = [
         {
@@ -122,10 +125,11 @@ export default function Home() {
         },
       ];
       setTasks(demoTasks.slice(0, experienceProfile.maxTasksToday));
-      setProgress({ total_xp: 0, current_streak: 0, total_focused_minutes: 0, total_sessions_completed: 0 });
+      setProgress({ total_xp: guestXp, current_streak: 0, total_focused_minutes: 0, total_sessions_completed: 0 });
       setLoading(false);
       return;
     }
+
 
     try {
       // Load today's tasks
