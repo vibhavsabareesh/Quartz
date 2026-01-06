@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useMode } from '@/contexts/ModeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ProgressRing } from '@/components/ui/progress-ring';
+import { CoffeeCupTimer, CycleIndicator } from '@/components/CoffeeCupTimer';
 import { supabase } from '@/integrations/supabase/client';
 import { MicroStep } from '@/lib/demo-data';
+import { cn } from '@/lib/utils';
 import { 
   Play, 
   Pause, 
@@ -14,16 +15,25 @@ import {
   Check,
   Clock,
   AlertCircle,
-  SkipForward
+  SkipForward,
+  Coffee
 } from 'lucide-react';
 
 interface Task {
   id: string;
   title: string;
   subject_name: string;
+  chapter_id?: string;
   micro_steps: MicroStep[] | string[];
   completed_micro_steps: number;
 }
+
+// Pomodoro presets
+const POMODORO_PRESETS = {
+  short: { work: 10, break: 2, longBreak: 5 },
+  standard: { work: 25, break: 5, longBreak: 15 },
+  long: { work: 45, break: 10, longBreak: 20 },
+};
 
 export default function FocusSession() {
   const { taskId } = useParams();
@@ -34,8 +44,19 @@ export default function FocusSession() {
 
   const task = location.state?.task as Task | undefined;
 
-  const [duration, setDuration] = useState(experienceProfile.defaultTimerMinutes);
-  const [timeLeft, setTimeLeft] = useState(duration * 60);
+  // Pomodoro state
+  const [preset, setPreset] = useState<'short' | 'standard' | 'long'>('standard');
+  const [currentCycle, setCurrentCycle] = useState(0);
+  const [totalCycles] = useState(4);
+  const [isBreak, setIsBreak] = useState(false);
+  const [isLongBreak, setIsLongBreak] = useState(false);
+  
+  const pomodoroConfig = POMODORO_PRESETS[preset];
+  const currentDuration = isBreak 
+    ? (isLongBreak ? pomodoroConfig.longBreak : pomodoroConfig.break)
+    : pomodoroConfig.work;
+
+  const [timeLeft, setTimeLeft] = useState(currentDuration * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState(task?.completed_micro_steps || 0);
@@ -44,12 +65,16 @@ export default function FocusSession() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef<Date | null>(null);
+  const totalWorkMinutesRef = useRef(0);
+
+  // Sensory mode check
+  const isSensoryMode = hasMode('sensory_safe') || experienceProfile.sensoryMode.reduceMotion;
 
   // Handle visibility change (anti-escape)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden && isRunning) {
-        // User left the tab during focus
+      if (document.hidden && isRunning && !isBreak) {
+        // User left the tab during focus (not during break)
         setWasInterrupted(true);
         endSession(false, 'tab_left');
       }
@@ -57,7 +82,7 @@ export default function FocusSession() {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [isRunning]);
+  }, [isRunning, isBreak]);
 
   // Timer logic
   useEffect(() => {
@@ -66,13 +91,13 @@ export default function FocusSession() {
         setTimeLeft(prev => {
           const newTime = prev - 1;
           
-          // Show ending soon banner (Routine mode)
-          if (experienceProfile.showEndingSoonBanner && newTime <= 60 && newTime > 0) {
+          // Show ending soon banner (last minute, only during work)
+          if (!isBreak && experienceProfile.showEndingSoonBanner && newTime <= 60 && newTime > 0) {
             setShowEndingSoon(true);
           }
           
           if (newTime <= 0) {
-            endSession(true, 'completed');
+            handlePhaseComplete();
             return 0;
           }
           
@@ -86,20 +111,55 @@ export default function FocusSession() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isRunning, experienceProfile.showEndingSoonBanner]);
+  }, [isRunning, isBreak, experienceProfile.showEndingSoonBanner]);
+
+  // Reset time when phase changes
+  useEffect(() => {
+    setTimeLeft(currentDuration * 60);
+    setShowEndingSoon(false);
+  }, [isBreak, isLongBreak, preset]);
+
+  const handlePhaseComplete = () => {
+    setIsRunning(false);
+    setShowEndingSoon(false);
+    
+    if (isBreak) {
+      // Break is over, start next work cycle
+      if (currentCycle >= totalCycles - 1) {
+        // All cycles complete, end session
+        endSession(true, 'completed');
+      } else {
+        setIsBreak(false);
+        setIsLongBreak(false);
+        setCurrentCycle(prev => prev + 1);
+        // Auto-start next cycle
+        setTimeout(() => setIsRunning(true), 1000);
+      }
+    } else {
+      // Work phase complete
+      totalWorkMinutesRef.current += pomodoroConfig.work;
+      
+      // Check if it's time for long break
+      const isLongBreakTime = (currentCycle + 1) % totalCycles === 0;
+      setIsBreak(true);
+      setIsLongBreak(isLongBreakTime);
+      // Auto-start break
+      setTimeout(() => setIsRunning(true), 1000);
+    }
+  };
 
   const startSession = async () => {
     setIsRunning(true);
     startTimeRef.current = new Date();
     setWasInterrupted(false);
 
-    if (!isGuestMode && user) {
+    if (!isGuestMode && user && !sessionId) {
       const { data } = await supabase
         .from('focus_sessions')
         .insert({
           user_id: user.id,
           task_id: taskId !== 'quick' ? taskId : null,
-          planned_duration: duration,
+          planned_duration: pomodoroConfig.work * totalCycles,
         })
         .select()
         .single();
@@ -118,11 +178,10 @@ export default function FocusSession() {
     setIsRunning(false);
     if (timerRef.current) clearInterval(timerRef.current);
 
-    const actualDuration = startTimeRef.current
-      ? Math.floor((new Date().getTime() - startTimeRef.current.getTime()) / 1000 / 60)
-      : 0;
+    const actualDuration = totalWorkMinutesRef.current + 
+      (isBreak ? 0 : Math.floor((pomodoroConfig.work * 60 - timeLeft) / 60));
 
-    const xpEarned = completed ? duration : 0;
+    const xpEarned = completed ? actualDuration : 0;
 
     if (!isGuestMode && user && sessionId) {
       await supabase
@@ -138,7 +197,6 @@ export default function FocusSession() {
 
       // Update progress
       if (completed) {
-        // Update user progress manually
         const { data: currentProgress } = await supabase
           .from('user_progress')
           .select('total_xp, total_focused_minutes, total_sessions_completed')
@@ -171,9 +229,10 @@ export default function FocusSession() {
         xpEarned,
         duration: actualDuration,
         task,
+        sessionId,
       },
     });
-  }, [isGuestMode, user, sessionId, duration, taskId, task, navigate]);
+  }, [isGuestMode, user, sessionId, pomodoroConfig.work, timeLeft, isBreak, taskId, task, navigate]);
 
   const completeStep = () => {
     if (task && currentStep < task.micro_steps.length - 1) {
@@ -181,9 +240,13 @@ export default function FocusSession() {
     }
   };
 
-  const setTimerDuration = (mins: number) => {
-    setDuration(mins);
-    setTimeLeft(mins * 60);
+  const selectPreset = (p: 'short' | 'standard' | 'long') => {
+    if (!isRunning) {
+      setPreset(p);
+      setCurrentCycle(0);
+      setIsBreak(false);
+      setIsLongBreak(false);
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -192,7 +255,8 @@ export default function FocusSession() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progress = ((duration * 60 - timeLeft) / (duration * 60)) * 100;
+  const progress = ((currentDuration * 60 - timeLeft) / (currentDuration * 60)) * 100;
+  const coffeeProgress = 100 - progress; // Coffee drains as time passes
 
   if (!task && taskId !== 'quick') {
     return (
@@ -216,7 +280,7 @@ export default function FocusSession() {
             <p className="text-sm">
               Session ended because focus was interrupted. Want to try 10 minutes?
             </p>
-            <Button size="sm" onClick={() => { setTimerDuration(10); setWasInterrupted(false); }}>
+            <Button size="sm" onClick={() => { selectPreset('short'); setWasInterrupted(false); }}>
               Try 10 min
             </Button>
           </motion.div>
@@ -235,38 +299,59 @@ export default function FocusSession() {
           </motion.div>
         )}
 
-        {/* Timer */}
+        {/* Phase indicator */}
+        <div className={cn(
+          "inline-flex items-center gap-2 px-4 py-2 rounded-full",
+          isBreak ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" : "bg-primary/10 text-primary"
+        )}>
+          <Coffee className="w-4 h-4" />
+          <span className="font-medium">
+            {isBreak ? (isLongBreak ? 'Long Break' : 'Short Break') : 'Focus Time'}
+          </span>
+        </div>
+
+        {/* Coffee Cup Timer */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex justify-center"
+          className="flex flex-col items-center justify-center"
         >
-          <ProgressRing
-            progress={progress}
-            size={240}
-            strokeWidth={12}
-            className={isRunning ? 'timer-active' : ''}
-          >
-            <div className="text-center">
-              <p className="text-5xl font-bold text-foreground">{formatTime(timeLeft)}</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {isRunning ? 'Focusing...' : 'Ready'}
-              </p>
-            </div>
-          </ProgressRing>
+          <CoffeeCupTimer
+            progress={coffeeProgress}
+            isRunning={isRunning}
+            isBreak={isBreak}
+            sensoryMode={isSensoryMode}
+            size="lg"
+          />
+          
+          <p className="text-5xl font-bold text-foreground mt-4">{formatTime(timeLeft)}</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            {isRunning ? (isBreak ? 'Recharging...' : 'Focusing...') : 'Ready'}
+          </p>
         </motion.div>
 
-        {/* Duration Selector (before start) */}
-        {!isRunning && timeLeft === duration * 60 && (
+        {/* Cycle Indicator */}
+        <CycleIndicator 
+          currentCycle={currentCycle} 
+          totalCycles={totalCycles} 
+          isBreak={isBreak} 
+        />
+
+        {/* Preset Selector (before start) */}
+        {!isRunning && timeLeft === currentDuration * 60 && currentCycle === 0 && !isBreak && (
           <div className="flex justify-center gap-3">
-            {[10, 25, 45].map(mins => (
+            {[
+              { key: 'short', label: '10 min', mins: 10 },
+              { key: 'standard', label: '25 min', mins: 25 },
+              { key: 'long', label: '45 min', mins: 45 },
+            ].map(({ key, label }) => (
               <Button
-                key={mins}
-                variant={duration === mins ? 'default' : 'outline'}
+                key={key}
+                variant={preset === key ? 'default' : 'outline'}
                 size="lg"
-                onClick={() => setTimerDuration(mins)}
+                onClick={() => selectPreset(key as any)}
               >
-                {mins} min
+                {label}
               </Button>
             ))}
           </div>
@@ -277,7 +362,7 @@ export default function FocusSession() {
           {!isRunning ? (
             <Button size="lg" className="h-14 px-8 gap-2" onClick={startSession}>
               <Play className="w-5 h-5" />
-              {timeLeft < duration * 60 ? 'Resume' : 'Start'}
+              {timeLeft < currentDuration * 60 ? 'Resume' : 'Start'}
             </Button>
           ) : (
             <>
@@ -297,7 +382,7 @@ export default function FocusSession() {
         </div>
 
         {/* Micro-steps */}
-        {task && task.micro_steps.length > 0 && (() => {
+        {task && task.micro_steps.length > 0 && !isBreak && (() => {
           const step = task.micro_steps[currentStep];
           const stepText = typeof step === 'string' ? step : step.text;
           const isSkippable = typeof step === 'object' && step.skippable;
@@ -344,9 +429,27 @@ export default function FocusSession() {
             </motion.div>
           );
         })()}
+
+        {/* Break message */}
+        {isBreak && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl"
+          >
+            <p className="text-lg font-medium text-blue-700 dark:text-blue-300">
+              {isLongBreak ? '☕ Time for a longer break!' : '🍵 Quick recharge time'}
+            </p>
+            <p className="text-sm text-blue-600 dark:text-blue-400 mt-2">
+              {isLongBreak 
+                ? 'Stand up, stretch, grab a snack. You earned it!'
+                : 'Take a breath, look away from the screen.'}
+            </p>
+          </motion.div>
+        )}
       </div>
 
-      {/* Ending Soon Banner (Routine mode) */}
+      {/* Ending Soon Banner */}
       <AnimatePresence>
         {showEndingSoon && experienceProfile.showEndingSoonBanner && (
           <motion.div
