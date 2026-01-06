@@ -46,15 +46,33 @@ export interface CalendarData {
   error: string | null;
 }
 
-// Generate mock data for guest mode
+// Generate mock data for guest mode - only for past days
 function generateMockData(year: number, month: number): CalendarDay[] {
   const start = startOfMonth(new Date(year, month));
   const end = endOfMonth(new Date(year, month));
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
   const days = eachDayOfInterval({ start, end });
 
   return days.map((date, index) => {
     const dayOfWeek = date.getDay();
     const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    const isFutureDay = date > today;
+    
+    // No activity for future days
+    if (isFutureDay) {
+      return {
+        date: format(date, 'yyyy-MM-dd'),
+        tasksCompleted: 0,
+        totalTasks: 0,
+        totalMinutes: 0,
+        streakMaintained: false,
+        xpEarned: 0,
+        sessions: [],
+        tasks: [],
+      };
+    }
+    
     const hasActivity = Math.random() > (isWeekend ? 0.6 : 0.3);
     const tasksCompleted = hasActivity ? Math.floor(Math.random() * 4) + 1 : 0;
     const totalMinutes = hasActivity ? Math.floor(Math.random() * 90) + 15 : 0;
