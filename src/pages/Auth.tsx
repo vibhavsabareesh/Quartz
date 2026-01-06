@@ -114,7 +114,7 @@ export default function Auth() {
       >
         <div className="text-center mb-8">
           <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-card border shadow-lg flex items-center justify-center">
-            <img src="/quartz-logo.svg" alt="Quartz" className="w-10 h-10" />
+            <img src="/quartz-logo.jpeg" alt="Quartz" className="w-10 h-10 rounded-lg" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">Welcome to Quartz</h1>
           <p className="text-muted-foreground mt-2">Sign in or create an account to continue</p>
