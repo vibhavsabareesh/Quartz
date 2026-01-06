@@ -193,7 +193,7 @@ export function generateDailyTasks(
 
 // AI Tutor system prompts based on disability modes
 export function getAITutorSystemPrompt(modes: SupportModeKey[]): string {
-  let basePrompt = `You are NeuroStudy AI Tutor, a helpful and patient educational assistant. `;
+  let basePrompt = `You are Quartz AI Tutor, a helpful and patient educational assistant. `;
   
   if (modes.includes('dyslexia')) {
     basePrompt += `

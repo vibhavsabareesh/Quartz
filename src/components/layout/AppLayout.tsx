@@ -9,7 +9,7 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Target,
+  Map,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -20,6 +20,7 @@ interface AppLayoutProps {
 const navItems = [
   { path: '/home', label: 'Today', icon: Home },
   { path: '/library', label: 'Library', icon: BookOpen },
+  { path: '/quartz-road', label: 'Quartz Road', icon: Map },
   { path: '/progress', label: 'Progress', icon: BarChart3 },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
@@ -36,10 +37,8 @@ export function AppLayout({ children }: AppLayoutProps) {
       <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between px-4">
           <Link to="/home" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Target className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-xl text-foreground">NeuroStudy</span>
+            <img src="/quartz-logo.svg" alt="Quartz" className="w-8 h-8" />
+            <span className="font-bold text-xl text-foreground">Quartz</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
@@ -94,7 +93,7 @@ export function AppLayout({ children }: AppLayoutProps) {
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-40">
         <div className="flex items-center justify-around py-2">
-          {navItems.map((item) => {
+          {navItems.slice(0, 4).map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
             return (
@@ -102,7 +101,7 @@ export function AppLayout({ children }: AppLayoutProps) {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "flex flex-col items-center gap-1 px-4 py-2 rounded-lg transition-colors",
+                  "flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors",
                   experienceProfile.largeButtons && "min-h-[56px] min-w-[56px]",
                   isActive
                     ? "text-primary"

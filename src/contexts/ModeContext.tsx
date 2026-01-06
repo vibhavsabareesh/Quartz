@@ -87,12 +87,12 @@ const ModeContext = createContext<ModeContextType | undefined>(undefined);
 
 export function ModeProvider({ children }: { children: React.ReactNode }) {
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
-    const saved = localStorage.getItem('neuro-study-preferences');
+    const saved = localStorage.getItem('quartz-preferences');
     return saved ? { ...defaultPreferences, ...JSON.parse(saved) } : defaultPreferences;
   });
   
   const [energyLevel, setEnergyLevel] = useState<EnergyLevel>(() => {
-    const saved = localStorage.getItem('neuro-study-energy-today');
+    const saved = localStorage.getItem('quartz-energy-today');
     return (saved as EnergyLevel) || 'normal';
   });
 
@@ -100,11 +100,11 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
 
   // Persist preferences
   useEffect(() => {
-    localStorage.setItem('neuro-study-preferences', JSON.stringify(preferences));
+    localStorage.setItem('quartz-preferences', JSON.stringify(preferences));
   }, [preferences]);
 
   useEffect(() => {
-    localStorage.setItem('neuro-study-energy-today', energyLevel);
+    localStorage.setItem('quartz-energy-today', energyLevel);
   }, [energyLevel]);
 
   const hasMode = (mode: SupportModeKey) => preferences.selectedModes.includes(mode);

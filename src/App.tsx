@@ -13,10 +13,13 @@ import Home from "./pages/Home";
 import FocusSession from "./pages/FocusSession";
 import SessionEnd from "./pages/SessionEnd";
 import Library from "./pages/Library";
+import SubjectPage from "./pages/SubjectPage";
 import ChapterPage from "./pages/ChapterPage";
 import Progress from "./pages/Progress";
 import Settings from "./pages/Settings";
 import NotesGenerator from "./pages/NotesGenerator";
+import QuartzRoad from "./pages/QuartzRoad";
+import ChemistryInteractive from "./pages/ChemistryInteractive";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,10 +40,13 @@ const App = () => (
               <Route path="/focus/:taskId" element={<FocusSession />} />
               <Route path="/session-end" element={<SessionEnd />} />
               <Route path="/library" element={<Library />} />
+              <Route path="/subject/:subjectName" element={<SubjectPage />} />
               <Route path="/chapter/:chapterId" element={<ChapterPage />} />
               <Route path="/progress" element={<Progress />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/notes" element={<NotesGenerator />} />
+              <Route path="/quartz-road" element={<QuartzRoad />} />
+              <Route path="/chemistry-interactive" element={<ChemistryInteractive />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

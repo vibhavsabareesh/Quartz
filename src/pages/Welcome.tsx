@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Target, Sparkles, Brain, Heart } from 'lucide-react';
+import { Sparkles, Brain, Heart } from 'lucide-react';
 
 export default function Welcome() {
   return (
@@ -15,11 +15,11 @@ export default function Welcome() {
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-            <Target className="w-10 h-10 text-primary-foreground" />
+          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-card border shadow-lg flex items-center justify-center">
+            <img src="/quartz-logo.svg" alt="Quartz" className="w-14 h-14" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            NeuroStudy
+            Quartz
           </h1>
           <p className="text-xl text-muted-foreground max-w-md mx-auto">
             Study your way. An adaptive learning environment that works with how you learn best.
@@ -67,15 +67,25 @@ export default function Welcome() {
             <Link to="/auth">Get Started</Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="text-lg px-8">
-            <Link to="/onboarding?guest=true">Try as Guest</Link>
+            <Link to="/library">Explore Library</Link>
           </Button>
         </motion.div>
+
+        {/* Quick demo info */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="mt-6 text-sm text-muted-foreground"
+        >
+          CBSE Class 9 content pre-loaded • No account needed to browse
+        </motion.p>
       </div>
 
       {/* Footer */}
       <footer className="py-6 text-center text-sm text-muted-foreground border-t bg-background/50">
         <p>
-          NeuroStudy is a study tool, not a medical device. It does not diagnose, treat, or cure any condition.
+          Quartz is a study tool, not a medical device. It does not diagnose, treat, or cure any condition.
         </p>
       </footer>
     </div>
