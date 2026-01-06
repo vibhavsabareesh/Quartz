@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { FlaskConical, Construction } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { FlaskConical, Construction, ExternalLink } from 'lucide-react';
 
 export default function ChemistryInteractive() {
   return (
@@ -33,6 +34,17 @@ export default function ChemistryInteractive() {
                   Soon you'll be able to explore molecules, simulate reactions, 
                   and learn chemistry through hands-on virtual experiments.
                 </p>
+              </div>
+
+              {/* Chemical Bonding Simulator Link */}
+              <div className="pt-4">
+                <Button asChild size="lg" className="gap-2">
+                  <a href="/CHEMMMMM2.html" target="_blank" rel="noopener noreferrer">
+                    <FlaskConical className="w-5 h-5" />
+                    Try Chemical Bonding Simulator
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </Button>
               </div>
 
               <div className="pt-6 border-t">
