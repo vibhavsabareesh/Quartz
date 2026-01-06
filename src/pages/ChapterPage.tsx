@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -28,6 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FlashcardDeck } from '@/components/FlashcardDeck';
+import { ChapterCompletionReport } from '@/components/ChapterCompletionReport';
 
 interface Chapter {
   id: string;
@@ -102,6 +103,12 @@ export default function ChapterPage() {
   const [levelFilter, setLevelFilter] = useState<string>('all');
   const [levelProgress, setLevelProgress] = useState<ReturnType<typeof calculateLevelProgress>>([]);
   const [questionAttempts, setQuestionAttempts] = useState<{ level: number; is_correct: boolean }[]>([]);
+  
+  // Completion state
+  const [showCompletionReport, setShowCompletionReport] = useState<'flashcards' | 'practice' | null>(null);
+  const [flashcardStats, setFlashcardStats] = useState({ known: 0, total: 0 });
+  const sessionCorrectRef = useRef(0);
+  const sessionTotalRef = useRef(0);
 
   useEffect(() => {
     loadChapter();
@@ -271,6 +278,12 @@ export default function ChapterPage() {
       setAnswerResult(result);
       setShowResult(true);
       
+      // Track session stats
+      sessionTotalRef.current += 1;
+      if (result.is_correct) {
+        sessionCorrectRef.current += 1;
+      }
+      
       // Reload performance stats after answering
       if (user) {
         loadPerformance();
@@ -288,7 +301,7 @@ export default function ChapterPage() {
   };
 
   const nextQuestion = () => {
-    if (currentQuestionIndex < questions.length - 1) {
+    if (currentQuestionIndex < filteredQuestions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
       setSelectedAnswer(null);
       setShowResult(false);
@@ -304,6 +317,81 @@ export default function ChapterPage() {
       setShowResult(false);
       setAnswerResult(null);
       setCurrentMathStep(0);
+    }
+  };
+
+  const addXpForCompletion = async (xp: number) => {
+    if (!user || isGuestMode || xp <= 0) return;
+    
+    try {
+      const { data: progress } = await supabase
+        .from('user_progress')
+        .select('total_xp')
+        .eq('user_id', user.id)
+        .single();
+      
+      await supabase
+        .from('user_progress')
+        .update({ total_xp: (progress?.total_xp || 0) + xp })
+        .eq('user_id', user.id);
+    } catch (error) {
+      console.error('Error adding XP:', error);
+    }
+  };
+
+  const handlePracticeComplete = async () => {
+    const total = sessionTotalRef.current;
+    const correct = sessionCorrectRef.current;
+    const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+    
+    // Award XP: base 5 per question + bonus for accuracy
+    const baseXp = total * 5;
+    const accuracyBonus = accuracy >= 80 ? 20 : accuracy >= 60 ? 10 : 0;
+    const xpEarned = baseXp + accuracyBonus;
+    
+    await addXpForCompletion(xpEarned);
+    
+    setShowCompletionReport('practice');
+  };
+
+  const handleFlashcardComplete = async (known: number, total: number) => {
+    setFlashcardStats({ known, total });
+    
+    // Award XP: 2 per card reviewed + bonus for mastery
+    const baseXp = total * 2;
+    const masteryRate = total > 0 ? known / total : 0;
+    const masteryBonus = masteryRate >= 0.8 ? 15 : masteryRate >= 0.6 ? 8 : 0;
+    const xpEarned = baseXp + masteryBonus;
+    
+    await addXpForCompletion(xpEarned);
+    
+    setShowCompletionReport('flashcards');
+  };
+
+  const resetPractice = () => {
+    setCurrentQuestionIndex(0);
+    setSelectedAnswer(null);
+    setShowResult(false);
+    setAnswerResult(null);
+    setCurrentMathStep(0);
+    sessionCorrectRef.current = 0;
+    sessionTotalRef.current = 0;
+    setShowCompletionReport(null);
+  };
+
+  const calculateXpEarned = () => {
+    if (showCompletionReport === 'flashcards') {
+      const baseXp = flashcardStats.total * 2;
+      const masteryRate = flashcardStats.total > 0 ? flashcardStats.known / flashcardStats.total : 0;
+      const masteryBonus = masteryRate >= 0.8 ? 15 : masteryRate >= 0.6 ? 8 : 0;
+      return baseXp + masteryBonus;
+    } else {
+      const total = sessionTotalRef.current;
+      const correct = sessionCorrectRef.current;
+      const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
+      const baseXp = total * 5;
+      const accuracyBonus = accuracy >= 80 ? 20 : accuracy >= 60 ? 10 : 0;
+      return baseXp + accuracyBonus;
     }
   };
 
@@ -539,10 +627,48 @@ export default function ChapterPage() {
           )}
 
           {activeTab === 'flashcards' && (
-            <FlashcardDeck flashcards={flashcards} />
+            showCompletionReport === 'flashcards' ? (
+              <ChapterCompletionReport
+                type="flashcards"
+                chapterTitle={chapter.title}
+                stats={{ total: flashcardStats.total, known: flashcardStats.known }}
+                xpEarned={calculateXpEarned()}
+                onContinue={() => {
+                  setShowCompletionReport(null);
+                  setActiveTab('practice');
+                }}
+                onRetry={() => {
+                  setShowCompletionReport(null);
+                }}
+              />
+            ) : (
+              <FlashcardDeck 
+                flashcards={flashcards} 
+                onComplete={(known, total) => handleFlashcardComplete(known, total)}
+              />
+            )
           )}
 
           {activeTab === 'practice' && (
+            showCompletionReport === 'practice' ? (
+              <ChapterCompletionReport
+                type="practice"
+                chapterTitle={chapter.title}
+                stats={{ 
+                  total: sessionTotalRef.current, 
+                  correct: sessionCorrectRef.current,
+                  accuracy: sessionTotalRef.current > 0 
+                    ? Math.round((sessionCorrectRef.current / sessionTotalRef.current) * 100) 
+                    : 0
+                }}
+                xpEarned={calculateXpEarned()}
+                onContinue={() => {
+                  setShowCompletionReport(null);
+                  navigate('/library');
+                }}
+                onRetry={resetPractice}
+              />
+            ) : (
             <div className="space-y-4">
               {/* Level Filter + Performance Stats */}
               <div className="flex items-center justify-between gap-4">
@@ -707,7 +833,7 @@ export default function ChapterPage() {
                       ) : (
                         <Button
                           size={experienceProfile.largeButtons ? "lg" : "default"}
-                          onClick={nextQuestion}
+                          onClick={currentQuestionIndex === filteredQuestions.length - 1 ? handlePracticeComplete : nextQuestion}
                         >
                           {currentQuestionIndex === filteredQuestions.length - 1 ? 'Finish' : 'Next'}
                           <ChevronRight className="w-4 h-4 ml-1" />
@@ -718,6 +844,7 @@ export default function ChapterPage() {
                 </Card>
               )}
             </div>
+            )
           )}
         </motion.div>
       </div>

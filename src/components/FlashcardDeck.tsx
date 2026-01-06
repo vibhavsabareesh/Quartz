@@ -13,7 +13,7 @@ interface Flashcard {
 
 interface FlashcardDeckProps {
   flashcards: Flashcard[];
-  onComplete?: () => void;
+  onComplete?: (known: number, total: number) => void;
 }
 
 export function FlashcardDeck({ flashcards, onComplete }: FlashcardDeckProps) {
@@ -35,7 +35,7 @@ export function FlashcardDeck({ flashcards, onComplete }: FlashcardDeckProps) {
       setCurrentIndex(prev => prev + 1);
       setIsFlipped(false);
     } else if (onComplete) {
-      onComplete();
+      onComplete(knownCards.size, shuffledCards.length);
     }
   };
 
