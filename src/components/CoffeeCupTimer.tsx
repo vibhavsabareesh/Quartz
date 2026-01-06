@@ -72,14 +72,17 @@ export function CoffeeCupTimer({
         <g clipPath="url(#cupClip)">
           <motion.rect
             x="17"
-            y={22 + (96 * (100 - coffeeLevel) / 100)}
             width="66"
-            height={96 * coffeeLevel / 100}
             fill={coffeeColor}
-            animate={sensoryMode ? {} : {
+            initial={false}
+            animate={{
               y: 22 + (96 * (100 - coffeeLevel) / 100),
+              height: 96 * coffeeLevel / 100,
             }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={sensoryMode ? { duration: 0 } : { 
+              duration: 1.2, 
+              ease: [0.4, 0, 0.2, 1],
+            }}
           />
           
           {/* Coffee surface shine */}
