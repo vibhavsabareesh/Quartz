@@ -45,6 +45,7 @@ interface Task {
 
 // Pomodoro presets
 const POMODORO_PRESETS = {
+  demo: { work: 1, break: 0.5, longBreak: 1 },
   short: { work: 10, break: 2, longBreak: 5 },
   standard: { work: 25, break: 5, longBreak: 15 },
   long: { work: 45, break: 10, longBreak: 20 },
