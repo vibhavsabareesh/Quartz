@@ -61,7 +61,7 @@ export default function FocusSession() {
   const [task, setTask] = useState<Task | undefined>(location.state?.task as Task | undefined);
 
   // Pomodoro state
-  const [preset, setPreset] = useState<'short' | 'standard' | 'long'>('standard');
+  const [preset, setPreset] = useState<'demo' | 'short' | 'standard' | 'long'>('standard');
   const [currentCycle, setCurrentCycle] = useState(0);
   const [totalCycles] = useState(4);
   const [isBreak, setIsBreak] = useState(false);
@@ -119,6 +119,19 @@ export default function FocusSession() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [isRunning, isBreak]);
+
+  // Hidden keyboard shortcut for demo mode (press 'd' when not running)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'd' && !isRunning && currentCycle === 0 && !isBreak) {
+        setPreset('demo');
+        setTimeLeft(POMODORO_PRESETS.demo.work * 60);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isRunning, currentCycle, isBreak]);
 
   // Timer logic
   useEffect(() => {
