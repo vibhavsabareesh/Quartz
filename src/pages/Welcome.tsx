@@ -3,11 +3,11 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Brain, Heart } from 'lucide-react';
-import { OnboardingGuide } from '@/components/OnboardingGuide';
+import { useOnboarding } from '@/App';
 
 export default function Welcome() {
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const { startOnboarding } = useOnboarding();
 
   useEffect(() => {
     const completed = localStorage.getItem('quartz-onboarding-complete');
@@ -15,19 +15,8 @@ export default function Welcome() {
   }, []);
 
   const handleStartAsGuest = () => {
-    setShowOnboarding(true);
+    startOnboarding();
   };
-
-  const handleOnboardingComplete = () => {
-    setHasCompletedOnboarding(true);
-    setShowOnboarding(false);
-    // Navigate to auth page after onboarding
-    window.location.href = '/auth';
-  };
-
-  if (showOnboarding) {
-    return <OnboardingGuide onComplete={handleOnboardingComplete} />;
-  }
 
   return (
     <div className="min-h-screen gradient-calm flex flex-col">
