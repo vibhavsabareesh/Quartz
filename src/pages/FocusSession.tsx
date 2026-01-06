@@ -230,8 +230,8 @@ export default function FocusSession() {
         })
         .eq('id', sessionId);
 
-      // Update progress
-      if (completed) {
+      // Update progress - always track minutes, only give XP for completed sessions
+      if (actualDuration > 0) {
         const { data: currentProgress } = await supabase
           .from('user_progress')
           .select('total_xp, total_focused_minutes, total_sessions_completed, current_streak, longest_streak, last_session_date')
@@ -244,6 +244,7 @@ export default function FocusSession() {
           
           let newStreak = currentProgress.current_streak || 0;
           
+          // Update streak if this is first session today
           if (lastDate !== today) {
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
@@ -251,8 +252,10 @@ export default function FocusSession() {
             
             if (lastDate === yesterdayStr) {
               newStreak += 1;
+            } else if (!lastDate) {
+              newStreak = 1; // First ever session
             } else {
-              newStreak = 1;
+              newStreak = 1; // Streak broken
             }
           }
           
@@ -261,15 +264,15 @@ export default function FocusSession() {
           await supabase.from('user_progress').update({
             total_xp: (currentProgress.total_xp || 0) + xpEarned,
             total_focused_minutes: (currentProgress.total_focused_minutes || 0) + actualDuration,
-            total_sessions_completed: (currentProgress.total_sessions_completed || 0) + 1,
+            total_sessions_completed: (currentProgress.total_sessions_completed || 0) + (completed ? 1 : 0),
             current_streak: newStreak,
             longest_streak: newLongestStreak,
             last_session_date: today,
           }).eq('user_id', user.id);
         }
 
-        // Mark task as completed
-        if (taskId && taskId !== 'quick') {
+        // Mark task as completed only if session completed
+        if (completed && taskId && taskId !== 'quick') {
           await supabase
             .from('daily_tasks')
             .update({ status: 'completed' })
