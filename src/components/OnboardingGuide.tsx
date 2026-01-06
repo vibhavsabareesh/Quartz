@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useMode } from '@/contexts/ModeContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Sparkles, 
   BookOpen, 
@@ -70,7 +72,7 @@ const onboardingSteps: OnboardingStep[] = [
     id: 'complete',
     icon: <Heart className="w-8 h-8 text-primary" />,
     title: "You're All Set! 🎉",
-    message: "You've earned your first 10 XP just for completing this guide! Now create an account to save your progress and keep learning!",
+    message: "You've earned your first 10 XP just for completing this guide! Now explore and start learning!",
     tip: "Remember: small steps lead to big achievements!"
   }
 ];
@@ -81,7 +83,8 @@ interface OnboardingGuideProps {
 
 export function OnboardingGuide({ onComplete }: OnboardingGuideProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const { setIsGuestMode } = useMode();
+  const { setIsGuestMode, isGuestMode } = useMode();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -97,15 +100,39 @@ export function OnboardingGuide({ onComplete }: OnboardingGuideProps) {
     }
   }, [currentStep, step.route, navigate, location.pathname]);
 
-  // Enable guest mode on mount so user can see pages
+  // Enable guest mode on mount if not authenticated
   useEffect(() => {
-    setIsGuestMode(true);
-  }, [setIsGuestMode]);
+    if (!user) {
+      setIsGuestMode(true);
+    }
+  }, [user, setIsGuestMode]);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (isLastStep) {
-      // Award XP and complete
-      localStorage.setItem('quartz-guest-xp', '10');
+      // Award XP based on user type
+      if (user) {
+        // Authenticated user - update database
+        const { data: existingProgress } = await supabase
+          .from('user_progress')
+          .select('id, total_xp')
+          .eq('user_id', user.id)
+          .single();
+
+        if (existingProgress) {
+          await supabase
+            .from('user_progress')
+            .update({ total_xp: (existingProgress.total_xp || 0) + 10 })
+            .eq('id', existingProgress.id);
+        } else {
+          await supabase
+            .from('user_progress')
+            .insert({ user_id: user.id, total_xp: 10 });
+        }
+      } else {
+        // Guest user - store in localStorage
+        localStorage.setItem('quartz-guest-xp', '10');
+      }
+      
       localStorage.setItem('quartz-onboarding-complete', 'true');
       onComplete();
     } else {
@@ -207,10 +234,17 @@ export function OnboardingGuide({ onComplete }: OnboardingGuideProps) {
                   onClick={handleNext}
                 >
                   {isLastStep ? (
-                    <>
-                      Create Account
-                      <Sparkles className="w-4 h-4" />
-                    </>
+                    user ? (
+                      <>
+                        Start Learning
+                        <Sparkles className="w-4 h-4" />
+                      </>
+                    ) : (
+                      <>
+                        Create Account
+                        <Sparkles className="w-4 h-4" />
+                      </>
+                    )
                   ) : isFirstStep ? (
                     <>
                       Start Tour

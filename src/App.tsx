@@ -29,7 +29,7 @@ const queryClient = new QueryClient();
 // Onboarding context to manage the tour state globally
 interface OnboardingContextType {
   isOnboarding: boolean;
-  startOnboarding: () => void;
+  startOnboarding: (isAuthenticated?: boolean) => void;
   endOnboarding: () => void;
 }
 
@@ -43,12 +43,18 @@ export const useOnboarding = () => {
 
 function AppContent() {
   const [isOnboarding, setIsOnboarding] = useState(false);
+  const [onboardingUser, setOnboardingUser] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const startOnboarding = () => setIsOnboarding(true);
+  const startOnboarding = (isAuthenticated: boolean = false) => {
+    setOnboardingUser(isAuthenticated);
+    setIsOnboarding(true);
+  };
+  
   const endOnboarding = () => {
     setIsOnboarding(false);
-    navigate('/auth');
+    // Authenticated users go to home, guests go to auth
+    navigate(onboardingUser ? '/home' : '/auth');
   };
 
   return (
