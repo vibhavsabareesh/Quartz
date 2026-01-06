@@ -50,6 +50,14 @@ interface AnswerResult {
   correct_answer: string | null;
 }
 
+interface ChapterPerformance {
+  total_attempts: number;
+  correct_attempts: number;
+  accuracy: number;
+  unique_questions: number;
+  mastered_questions: number;
+}
+
 export default function ChapterPage() {
   const { chapterId } = useParams();
   const navigate = useNavigate();
@@ -72,10 +80,19 @@ export default function ChapterPage() {
 
   // Reading support state
   const [currentSection, setCurrentSection] = useState(0);
+  
+  // Performance tracking
+  const [performance, setPerformance] = useState<ChapterPerformance | null>(null);
 
   useEffect(() => {
     loadChapter();
   }, [chapterId]);
+
+  useEffect(() => {
+    if (user && chapterId) {
+      loadPerformance();
+    }
+  }, [user, chapterId]);
 
   const loadChapter = async () => {
     if (!chapterId) return;
@@ -105,6 +122,21 @@ export default function ChapterPage() {
     }
     
     setLoading(false);
+  };
+
+  const loadPerformance = async () => {
+    if (!chapterId || !user) return;
+    
+    try {
+      const { data } = await supabase
+        .rpc('get_chapter_performance', { p_chapter_id: chapterId });
+      
+      if (data && typeof data === 'object' && 'total_attempts' in data) {
+        setPerformance(data as unknown as ChapterPerformance);
+      }
+    } catch (error) {
+      console.error('Error loading performance:', error);
+    }
   };
 
   const addToTodaysPlan = async () => {
@@ -170,6 +202,11 @@ export default function ChapterPage() {
       const result = data as unknown as AnswerResult;
       setAnswerResult(result);
       setShowResult(true);
+      
+      // Reload performance stats after answering
+      if (user) {
+        loadPerformance();
+      }
     } catch (error) {
       console.error('Error checking answer:', error);
       toast({
@@ -399,6 +436,34 @@ export default function ChapterPage() {
 
           {activeTab === 'practice' && (
             <div className="space-y-4">
+              {/* Performance Stats Card */}
+              {performance && performance.total_attempts > 0 && (
+                <Card className="bg-muted/30">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-4">
+                        <div>
+                          <span className="text-muted-foreground">Accuracy:</span>{' '}
+                          <span className={cn(
+                            "font-semibold",
+                            performance.accuracy >= 70 ? "text-success" : performance.accuracy >= 40 ? "text-warning" : "text-destructive"
+                          )}>
+                            {performance.accuracy}%
+                          </span>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Mastered:</span>{' '}
+                          <span className="font-semibold">{performance.mastered_questions}/{questions.length}</span>
+                        </div>
+                      </div>
+                      <div className="text-muted-foreground">
+                        {performance.total_attempts} attempt{performance.total_attempts !== 1 ? 's' : ''}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              
               {questions.length === 0 ? (
                 <Card className="p-8 text-center">
                   <HelpCircle className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
