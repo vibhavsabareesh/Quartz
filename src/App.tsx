@@ -17,6 +17,7 @@ import ChapterPage from "./pages/ChapterPage";
 import Progress from "./pages/Progress";
 import Settings from "./pages/Settings";
 import NotesGenerator from "./pages/NotesGenerator";
+import CalendarPage from "./pages/CalendarPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/home" element={<Home />} />
+              <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/focus/:taskId" element={<FocusSession />} />
               <Route path="/session-end" element={<SessionEnd />} />
               <Route path="/library" element={<Library />} />
