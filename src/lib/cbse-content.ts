@@ -54,11 +54,11 @@ export const CBSE_CLASS_9_CONTENT: SubjectContent[] = [
         ],
         skills: ['concept recall', 'number classification', 'problem solving'],
         flashcards: [
-          { front: 'What are natural numbers?', back: 'Positive counting numbers starting from 1: 1, 2, 3, 4...' },
-          { front: 'What makes a number irrational?', back: 'It cannot be expressed as p/q and has non-terminating, non-repeating decimals' },
-          { front: 'Is √2 rational or irrational?', back: 'Irrational - it cannot be expressed as a fraction' },
-          { front: 'What is the difference between integers and whole numbers?', back: 'Integers include negative numbers, whole numbers start from 0' },
-          { front: 'Is 0 a natural number?', back: 'No, natural numbers start from 1. Zero is a whole number.' }
+          { front: 'Classify the number -7. Is it a natural, whole, or integer?', back: 'Integer. -7 is negative, so it cannot be natural (positive) or whole (non-negative), but integers include all negative numbers.' },
+          { front: 'Between 3 and 4, how many irrational numbers exist?', back: 'Infinitely many! Examples include √10, √11, √12, √13, √14, √15, π, and countless others.' },
+          { front: 'If √n is rational, what must be true about n?', back: 'n must be a perfect square (like 1, 4, 9, 16, 25...). Only perfect squares have rational square roots.' },
+          { front: 'Find one rational number between 1/3 and 1/2.', back: '5/12 (or 2/5, 3/7, etc.). One method: average them → (1/3 + 1/2) ÷ 2 = 5/12' },
+          { front: 'Is 0.101001000100001... (pattern continues) rational or irrational?', back: 'Irrational. The decimal is non-terminating AND non-repeating (the pattern grows, it doesn\'t repeat).' }
         ],
         questions: [
           { text: 'Which of the following is a natural number?', type: 'mcq', options: ['-5', '0', '7', '3.14'], answer: '7', level: 1, skills: ['concept recall'], explanation: 'Natural numbers are positive counting numbers starting from 1' },
