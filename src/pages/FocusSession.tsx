@@ -42,7 +42,7 @@ export default function FocusSession() {
   const { experienceProfile, hasMode, isGuestMode } = useMode();
   const { user } = useAuth();
 
-  const task = location.state?.task as Task | undefined;
+  const [task, setTask] = useState<Task | undefined>(location.state?.task as Task | undefined);
 
   // Pomodoro state
   const [preset, setPreset] = useState<'short' | 'standard' | 'long'>('standard');
@@ -69,6 +69,30 @@ export default function FocusSession() {
 
   // Sensory mode check
   const isSensoryMode = hasMode('sensory_safe') || experienceProfile.sensoryMode.reduceMotion;
+
+  // Fetch task if not in state
+  useEffect(() => {
+    if (!task && taskId && taskId !== 'quick' && user) {
+      supabase
+        .from('daily_tasks')
+        .select('id, title, subject_name, chapter_id, micro_steps, completed_micro_steps')
+        .eq('id', taskId)
+        .single()
+        .then(({ data }) => {
+          if (data) {
+            // Parse micro_steps if it's a string
+            const microSteps = typeof data.micro_steps === 'string' 
+              ? JSON.parse(data.micro_steps) 
+              : data.micro_steps || [];
+            setTask({
+              ...data,
+              micro_steps: microSteps,
+            } as Task);
+            setCurrentStep(data.completed_micro_steps || 0);
+          }
+        });
+    }
+  }, [taskId, task, user]);
 
   // Handle visibility change (anti-escape)
   useEffect(() => {
@@ -382,8 +406,9 @@ export default function FocusSession() {
         </div>
 
         {/* Micro-steps */}
-        {task && task.micro_steps.length > 0 && !isBreak && (() => {
+        {task && task.micro_steps && task.micro_steps.length > 0 && !isBreak && (() => {
           const step = task.micro_steps[currentStep];
+          if (!step) return null;
           const stepText = typeof step === 'string' ? step : step.text;
           const isSkippable = typeof step === 'object' && step.skippable;
           
