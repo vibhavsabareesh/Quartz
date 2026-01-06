@@ -61,7 +61,7 @@
     <video id="video-input" autoplay playsinline></video>
     <canvas id="output_canvas"></canvas>
     <div id="instructions">
-        Pinch to pick up atoms. Try Na + OH for NaOH or H + OH for H₂O!
+        Pinch to pick up atoms and then merge them to form compounds!
     </div>
 </div>
 
@@ -75,9 +75,9 @@
     const SCENE_WIDTH = 65; 
     const SCENE_HEIGHT = 45; 
     const REST_Y = -15; 
-    const PICKUP_THRESHOLD = 9;
-    const BOND_DIST = 10;
-    const SMOOTHING = 0.85;
+    const PICKUP_THRESHOLD = 10;
+    const BOND_DIST = 13;
+    const SMOOTHING = 0.82;
 
     let renderer, mainCamera, scene, hands;
     let spheresO = [], spheresH = []; 
@@ -189,14 +189,14 @@
         scene = new THREE.Scene();
 
         // --- BLUE GROUP ---
-        spheresO.push(createAtom(0x00ffff, 18, 'O'));
-        spheresO.push(createAtom(0x00ffff, 28, 'Cl'));
-        spheresO.push(createAtom(0x00ffff, 8, 'OH')); // Added OH to Blue
+        spheresO.push(createAtom(0x00ffff, 15, 'O2'));
+        spheresO.push(createAtom(0x00ffff, 25, 'Cl2'));
+        spheresO.push(createAtom(0x00ffff, 5, 'OH')); 
         
         // --- RED GROUP ---
-        spheresH.push(createAtom(0xff0000, -8, 'Na')); // Na is now Red
-        spheresH.push(createAtom(0xff0000, -18, 'H'));
-        spheresH.push(createAtom(0xff0000, -28, 'Si'));
+        spheresH.push(createAtom(0xff0000, -5, 'Na')); 
+        spheresH.push(createAtom(0xff0000, -15, 'H2'));
+        spheresH.push(createAtom(0xff0000, -25, 'Ca')); // Replaced Si with Ca
 
         centerSphere = new THREE.Mesh(
             new THREE.SphereGeometry(SPHERE_SIZE * 1.6, 32, 32), 
@@ -233,10 +233,14 @@
         
         if (results.multiHandLandmarks) {
             results.multiHandLandmarks.forEach((landmarks, i) => {
-                drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: '#00ffff', lineWidth: 4});
+                const label = results.multiHandedness[i].label; 
+                
+                // Color Left hand skeleton Red, Right hand skeleton Cyan
+                let skeletonColor = (label === 'Right') ? '#ff0000' : '#00ffff';
+                
+                drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: skeletonColor, lineWidth: 4});
                 drawLandmarks(canvasCtx, landmarks, {color: '#ffffff', lineWidth: 1, radius: 2});
                 
-                const label = results.multiHandedness[i].label; 
                 const thumb = landmarks[4];
                 const index = landmarks[8];
                 const x = (1 - thumb.x) * SCENE_WIDTH - (SCENE_WIDTH / 2);
@@ -314,13 +318,16 @@
 
                 const check = (a, b) => (s1 === a && s2 === b) || (s1 === b && s2 === a);
 
-                if (check('Si', 'O')) { resultText = "SiO₂"; resultColor = 0xFFD700; } 
-                else if (check('Si', 'Cl')) { resultText = "SiCl₄"; resultColor = 0x00FF00; }
-                else if (check('H', 'Cl')) { resultText = "HCl"; resultColor = 0x00008B; }
-                else if (check('Na', 'Cl')) { resultText = "NaCl"; resultColor = 0x006400; }
-                else if (check('H', 'OH')) { resultText = "H₂O"; resultColor = 0x8A2BE2; }
-                else if (check('Na', 'O')) { resultText = "Na₂O"; resultColor = 0xFFA500; }
-                else if (check('Na', 'OH')) { resultText = "NaOH"; resultColor = 0xFFC0CB; } // New Reaction
+                // Updated reactions for Calcium (Ca)
+                if (check('Ca', 'O')) { resultText = "CaO"; resultColor = 0xFFFACD; } 
+                else if (check('Ca', 'Cl2')) { resultText = "CaCl₂"; resultColor = 0xADFF2F; }
+                else if (check('H2', 'Cl2')) { resultText = "HCl"; resultColor = 0x00008B; }
+                else if (check('Na', 'Cl2')) { resultText = "NaCl"; resultColor = 0x006400; }
+                else if (check('H2', 'O2') || check('H', 'OH')) { resultText = "H₂O"; resultColor = 0x8A2BE2; }
+                else if (check('Ca', 'O2')){resultText = "CaO"; resultColor = 0x771083;}
+                else if (check('Na', 'O2')) { resultText = "Na₂O"; resultColor = 0xFFA500; }
+                else if (check('Na', 'OH')) { resultText = "NaOH"; resultColor = 0xFFC0CB; }
+                else if (check('Ca', 'OH')) {resultText = "Ca(OH)2"; resultColor = 0x00FF00;}
 
                 if (!wasBonded && resultText !== "??") {
                     centerSphere.children.forEach(child => centerSphere.remove(child));
