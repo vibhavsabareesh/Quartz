@@ -29,7 +29,7 @@ export default function Welcome() {
           className="mb-8"
         >
           <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-card border shadow-lg flex items-center justify-center">
-            <img src="/quartz-logo.jpeg" alt="Quartz" className="w-14 h-14 rounded-lg" />
+            <img src="/quartz-logo.png" alt="Quartz" className="w-14 h-14" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
             Quartz
