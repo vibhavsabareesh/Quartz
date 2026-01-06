@@ -182,7 +182,7 @@ export function useCalendarData(year: number, month: number): CalendarData {
       
       return {
         days: mockDays,
-        currentStreak: 12,
+        currentStreak: 0,
         bestDay,
         totalXpMonth: mockDays.reduce((sum, d) => sum + d.xpEarned, 0),
         totalMinutesMonth: mockDays.reduce((sum, d) => sum + d.totalMinutes, 0),
