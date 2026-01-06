@@ -25,6 +25,8 @@ interface OnboardingStep {
   message: string;
   tip?: string;
   route?: string;
+  // Position of the guide card for this step
+  position?: 'bottom-center' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
 }
 
 const onboardingSteps: OnboardingStep[] = [
@@ -34,7 +36,8 @@ const onboardingSteps: OnboardingStep[] = [
     title: "Welcome to Quartz! ✨",
     message: "I'm your AI study guide. I'll take you on a tour of how Quartz works. It's designed to adapt to how you learn best!",
     tip: "You can explore at your own pace. No pressure!",
-    route: '/'
+    route: '/',
+    position: 'center'
   },
   {
     id: 'library',
@@ -42,7 +45,8 @@ const onboardingSteps: OnboardingStep[] = [
     title: "Your Learning Library 📚",
     message: "This is the Library! All your subjects are organized by chapters. Each chapter has notes, flashcards, practice questions, and an AI tutor.",
     tip: "Start with topics you find interesting - it makes learning easier!",
-    route: '/library'
+    route: '/library',
+    position: 'bottom-right'
   },
   {
     id: 'home',
@@ -50,7 +54,8 @@ const onboardingSteps: OnboardingStep[] = [
     title: "Your Daily Plan 🎯",
     message: "This is your Home page! It shows personalized daily tasks based on your energy and available time. Tasks are broken into small, manageable micro-steps.",
     tip: "On low energy days, it's okay to do less. Progress is progress!",
-    route: '/home'
+    route: '/home',
+    position: 'bottom-left'
   },
   {
     id: 'progress',
@@ -58,7 +63,8 @@ const onboardingSteps: OnboardingStep[] = [
     title: "Track Your Progress 📊",
     message: "Here you can see your learning journey! Track XP, streaks, completed sessions, and badges you've earned.",
     tip: "The coffee cup timer fills up as you work - it's oddly satisfying!",
-    route: '/progress'
+    route: '/progress',
+    position: 'top-right'
   },
   {
     id: 'settings',
@@ -66,16 +72,37 @@ const onboardingSteps: OnboardingStep[] = [
     title: "Made for You 🧠",
     message: "In Settings, you can customize Quartz to your needs - larger text, step-by-step math help, calmer interface, and more!",
     tip: "Try the different accessibility modes to find what works for you!",
-    route: '/settings'
+    route: '/settings',
+    position: 'top-left'
   },
   {
     id: 'complete',
     icon: <Heart className="w-8 h-8 text-primary" />,
     title: "You're All Set! 🎉",
     message: "You've earned your first 10 XP just for completing this guide! Now explore and start learning!",
-    tip: "Remember: small steps lead to big achievements!"
+    tip: "Remember: small steps lead to big achievements!",
+    position: 'center'
   }
 ];
+
+// Get position classes for the guide card
+function getPositionClasses(position: OnboardingStep['position']): string {
+  switch (position) {
+    case 'center':
+      return 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2';
+    case 'top-left':
+      return 'top-20 left-4';
+    case 'top-right':
+      return 'top-20 right-4';
+    case 'bottom-left':
+      return 'bottom-24 left-4';
+    case 'bottom-right':
+      return 'bottom-24 right-4';
+    case 'bottom-center':
+    default:
+      return 'bottom-4 left-1/2 -translate-x-1/2';
+  }
+}
 
 interface OnboardingGuideProps {
   onComplete: () => void;
@@ -83,7 +110,7 @@ interface OnboardingGuideProps {
 
 export function OnboardingGuide({ onComplete }: OnboardingGuideProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const { setIsGuestMode, isGuestMode } = useMode();
+  const { setIsGuestMode } = useMode();
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -145,135 +172,160 @@ export function OnboardingGuide({ onComplete }: OnboardingGuideProps) {
     onComplete();
   };
 
+  const positionClasses = getPositionClasses(step.position);
+
   return (
     <div className="fixed inset-0 z-50 pointer-events-none">
-      {/* Semi-transparent backdrop */}
-      <div className="absolute inset-0 bg-background/60 backdrop-blur-sm pointer-events-auto" />
+      {/* Subtle overlay - no blur, just a light dim */}
+      <motion.div 
+        key={`overlay-${currentStep}`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3 }}
+        className="absolute inset-0 bg-background/30 pointer-events-auto" 
+      />
       
-      {/* Floating guide card */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-full max-w-md px-4 pointer-events-auto">
-        {/* Progress bar */}
-        <div className="mb-3">
-          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-            <motion.div
-              className="h-full bg-primary"
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.3 }}
-            />
+      {/* Floating guide card - moves to different positions */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={step.id}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ 
+            duration: 0.4,
+            type: "spring",
+            stiffness: 300,
+            damping: 25
+          }}
+          className={`absolute w-full max-w-md px-4 pointer-events-auto ${positionClasses}`}
+        >
+          {/* Progress bar */}
+          <div className="mb-3">
+            <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-primary"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 text-center">
+              Step {currentStep + 1} of {onboardingSteps.length}
+            </p>
           </div>
-          <p className="text-xs text-muted-foreground mt-1 text-center">
-            Step {currentStep + 1} of {onboardingSteps.length}
-          </p>
-        </div>
 
-        {/* Card */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={step.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card className="p-5 shadow-xl border-2">
-              <div className="flex items-start gap-4">
-                {/* Icon */}
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  {step.icon}
-                </div>
+          {/* Card */}
+          <Card className="p-5 shadow-2xl border-2 border-primary/20 bg-card/95 backdrop-blur-sm">
+            <div className="flex items-start gap-4">
+              {/* Animated Icon */}
+              <motion.div 
+                className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0"
+                animate={{ 
+                  scale: [1, 1.1, 1],
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+              >
+                {step.icon}
+              </motion.div>
 
-                <div className="flex-1 min-w-0">
-                  {/* Title */}
-                  <h2 className="text-lg font-bold text-foreground mb-1">
-                    {step.title}
-                  </h2>
+              <div className="flex-1 min-w-0">
+                {/* Title */}
+                <h2 className="text-lg font-bold text-foreground mb-1">
+                  {step.title}
+                </h2>
 
-                  {/* Message */}
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {step.message}
-                  </p>
+                {/* Message */}
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {step.message}
+                </p>
 
-                  {/* Tip */}
-                  {step.tip && (
-                    <div className="flex items-start gap-2 mt-3 p-2 bg-muted/50 rounded-lg">
-                      <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                      <p className="text-xs text-muted-foreground">{step.tip}</p>
-                    </div>
-                  )}
-
-                  {/* XP Preview on last step */}
-                  {isLastStep && (
-                    <motion.div
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      className="flex items-center gap-2 mt-3 p-2 bg-xp-gold/10 rounded-lg"
-                    >
-                      <Sparkles className="w-5 h-5 text-xp-gold" />
-                      <span className="text-lg font-bold text-xp-gold">+10 XP</span>
-                      <CheckCircle2 className="w-5 h-5 text-success" />
-                    </motion.div>
-                  )}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2 mt-4">
-                {!isLastStep && !isFirstStep && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSkip}
-                  >
-                    Skip Tour
-                  </Button>
+                {/* Tip */}
+                {step.tip && (
+                  <div className="flex items-start gap-2 mt-3 p-2 bg-muted/50 rounded-lg">
+                    <Lightbulb className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <p className="text-xs text-muted-foreground">{step.tip}</p>
+                  </div>
                 )}
+
+                {/* XP Preview on last step */}
+                {isLastStep && (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="flex items-center gap-2 mt-3 p-2 bg-xp-gold/10 rounded-lg"
+                  >
+                    <Sparkles className="w-5 h-5 text-xp-gold" />
+                    <span className="text-lg font-bold text-xp-gold">+10 XP</span>
+                    <CheckCircle2 className="w-5 h-5 text-success" />
+                  </motion.div>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-2 mt-4">
+              {!isLastStep && !isFirstStep && (
                 <Button
-                  className="flex-1 gap-2"
+                  variant="ghost"
                   size="sm"
-                  onClick={handleNext}
+                  onClick={handleSkip}
                 >
-                  {isLastStep ? (
-                    user ? (
-                      <>
-                        Start Learning
-                        <Sparkles className="w-4 h-4" />
-                      </>
-                    ) : (
-                      <>
-                        Create Account
-                        <Sparkles className="w-4 h-4" />
-                      </>
-                    )
-                  ) : isFirstStep ? (
+                  Skip Tour
+                </Button>
+              )}
+              <Button
+                className="flex-1 gap-2"
+                size="sm"
+                onClick={handleNext}
+              >
+                {isLastStep ? (
+                  user ? (
                     <>
-                      Start Tour
-                      <ArrowRight className="w-4 h-4" />
+                      Start Learning
+                      <Sparkles className="w-4 h-4" />
                     </>
                   ) : (
                     <>
-                      Next
-                      <ArrowRight className="w-4 h-4" />
+                      Create Account
+                      <Sparkles className="w-4 h-4" />
                     </>
-                  )}
-                </Button>
-              </div>
+                  )
+                ) : isFirstStep ? (
+                  <>
+                    Start Tour
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                ) : (
+                  <>
+                    Next
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </Button>
+            </div>
 
-              {/* Step indicators */}
-              <div className="flex justify-center gap-1.5 mt-3">
-                {onboardingSteps.map((_, index) => (
-                  <div
-                    key={index}
-                    className={`w-1.5 h-1.5 rounded-full transition-colors ${
-                      index === currentStep ? 'bg-primary' : 'bg-muted-foreground/30'
-                    }`}
-                  />
-                ))}
-              </div>
-            </Card>
-          </motion.div>
-        </AnimatePresence>
-      </div>
+            {/* Step indicators */}
+            <div className="flex justify-center gap-1.5 mt-3">
+              {onboardingSteps.map((_, index) => (
+                <motion.div
+                  key={index}
+                  className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                    index === currentStep ? 'bg-primary' : 'bg-muted-foreground/30'
+                  }`}
+                  animate={index === currentStep ? { scale: [1, 1.3, 1] } : {}}
+                  transition={{ duration: 0.5 }}
+                />
+              ))}
+            </div>
+          </Card>
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
