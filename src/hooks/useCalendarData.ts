@@ -46,66 +46,22 @@ export interface CalendarData {
   error: string | null;
 }
 
-// Generate mock data for guest mode - only for past days
-function generateMockData(year: number, month: number): CalendarDay[] {
+// Generate empty data for guest mode - no demo data
+function generateEmptyData(year: number, month: number): CalendarDay[] {
   const start = startOfMonth(new Date(year, month));
   const end = endOfMonth(new Date(year, month));
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
   const days = eachDayOfInterval({ start, end });
 
-  return days.map((date, index) => {
-    const dayOfWeek = date.getDay();
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    const isFutureDay = date > today;
-    
-    // No activity for future days
-    if (isFutureDay) {
-      return {
-        date: format(date, 'yyyy-MM-dd'),
-        tasksCompleted: 0,
-        totalTasks: 0,
-        totalMinutes: 0,
-        streakMaintained: false,
-        xpEarned: 0,
-        sessions: [],
-        tasks: [],
-      };
-    }
-    
-    const hasActivity = Math.random() > (isWeekend ? 0.6 : 0.3);
-    const tasksCompleted = hasActivity ? Math.floor(Math.random() * 4) + 1 : 0;
-    const totalMinutes = hasActivity ? Math.floor(Math.random() * 90) + 15 : 0;
-    const xpEarned = tasksCompleted * 10 + Math.floor(totalMinutes / 5);
-
-    return {
-      date: format(date, 'yyyy-MM-dd'),
-      tasksCompleted,
-      totalTasks: tasksCompleted + (hasActivity ? Math.floor(Math.random() * 2) : 0),
-      totalMinutes,
-      streakMaintained: hasActivity && tasksCompleted > 0,
-      xpEarned,
-      sessions: hasActivity ? [{
-        id: `mock-${index}`,
-        started_at: new Date(date.setHours(14, 0, 0)).toISOString(),
-        ended_at: new Date(date.setHours(14, totalMinutes, 0)).toISOString(),
-        actual_duration: totalMinutes,
-        planned_duration: 25,
-        completed: true,
-        xp_earned: xpEarned,
-        task_id: null,
-      }] : [],
-      tasks: hasActivity ? Array.from({ length: tasksCompleted }, (_, i) => ({
-        id: `mock-task-${index}-${i}`,
-        title: ['Review Chapter Notes', 'Practice Problems', 'Flashcard Review', 'Summary Writing'][i % 4],
-        subject_name: ['Mathematics', 'Physics', 'Chemistry', 'Biology'][i % 4],
-        status: 'completed',
-        estimated_minutes: Math.floor(Math.random() * 20) + 10,
-        completed_micro_steps: 3,
-        micro_steps: ['Step 1', 'Step 2', 'Step 3'],
-      })) : [],
-    };
-  });
+  return days.map((date) => ({
+    date: format(date, 'yyyy-MM-dd'),
+    tasksCompleted: 0,
+    totalTasks: 0,
+    totalMinutes: 0,
+    streakMaintained: false,
+    xpEarned: 0,
+    sessions: [],
+    tasks: [],
+  }));
 }
 
 export function useCalendarData(year: number, month: number): CalendarData {
@@ -176,16 +132,14 @@ export function useCalendarData(year: number, month: number): CalendarData {
 
   const calendarData = useMemo((): CalendarData => {
     if (isGuestMode) {
-      const mockDays = generateMockData(year, month);
-      const bestDay = mockDays.reduce((best, day) => 
-        day.xpEarned > (best?.xpEarned || 0) ? day : best, mockDays[0]);
+      const emptyDays = generateEmptyData(year, month);
       
       return {
-        days: mockDays,
+        days: emptyDays,
         currentStreak: 0,
-        bestDay,
-        totalXpMonth: mockDays.reduce((sum, d) => sum + d.xpEarned, 0),
-        totalMinutesMonth: mockDays.reduce((sum, d) => sum + d.totalMinutes, 0),
+        bestDay: null,
+        totalXpMonth: 0,
+        totalMinutesMonth: 0,
         loading: false,
         error: null,
       };
