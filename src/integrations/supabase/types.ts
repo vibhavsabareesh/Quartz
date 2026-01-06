@@ -381,7 +381,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_answer: {
+        Args: { p_question_id: string; p_user_answer: string }
+        Returns: Json
+      }
+      get_practice_questions: {
+        Args: { p_chapter_id: string }
+        Returns: {
+          chapter_id: string
+          id: string
+          is_math: boolean
+          math_steps: string[]
+          options: string[]
+          question_text: string
+          question_type: string
+        }[]
+      }
     }
     Enums: {
       board_type: "CBSE" | "IGCSE"
