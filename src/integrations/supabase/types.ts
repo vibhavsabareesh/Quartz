@@ -292,6 +292,51 @@ export type Database = {
         }
         Relationships: []
       }
+      question_attempts: {
+        Row: {
+          attempted_at: string
+          chapter_id: string
+          id: string
+          is_correct: boolean
+          question_id: string
+          selected_answer: string
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          chapter_id: string
+          id?: string
+          is_correct: boolean
+          question_id: string
+          selected_answer: string
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          chapter_id?: string
+          id?: string
+          is_correct?: boolean
+          question_id?: string
+          selected_answer?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "question_attempts_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "question_attempts_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "practice_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subjects: {
         Row: {
           created_at: string | null
@@ -385,6 +430,7 @@ export type Database = {
         Args: { p_question_id: string; p_user_answer: string }
         Returns: Json
       }
+      get_chapter_performance: { Args: { p_chapter_id: string }; Returns: Json }
       get_practice_questions: {
         Args: { p_chapter_id: string }
         Returns: {
