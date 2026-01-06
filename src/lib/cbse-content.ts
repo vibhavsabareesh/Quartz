@@ -58,26 +58,14 @@ export const CBSE_CLASS_9_CONTENT: SubjectContent[] = [
           { front: 'What makes a number irrational?', back: 'It cannot be expressed as p/q and has non-terminating, non-repeating decimals' },
           { front: 'Is √2 rational or irrational?', back: 'Irrational - it cannot be expressed as a fraction' },
           { front: 'What is the difference between integers and whole numbers?', back: 'Integers include negative numbers, whole numbers start from 0' },
-          { front: 'Can every real number be plotted on a number line?', back: 'Yes, every real number has a unique position on the number line' },
-          { front: 'Is 0 a natural number?', back: 'No, natural numbers start from 1. Zero is a whole number.' },
-          { front: 'What is a terminating decimal?', back: 'A decimal that ends after a finite number of digits' },
-          { front: 'Give an example of a recurring decimal', back: '1/3 = 0.333... (3 repeats infinitely)' },
-          { front: 'Is π rational or irrational?', back: 'Irrational - it has non-terminating, non-repeating decimals' },
-          { front: 'What is the set symbol for integers?', back: 'Z (from German "Zahlen" meaning numbers)' }
+          { front: 'Is 0 a natural number?', back: 'No, natural numbers start from 1. Zero is a whole number.' }
         ],
         questions: [
           { text: 'Which of the following is a natural number?', type: 'mcq', options: ['-5', '0', '7', '3.14'], answer: '7', level: 1, skills: ['concept recall'], explanation: 'Natural numbers are positive counting numbers starting from 1' },
           { text: 'Is √3 a rational number?', type: 'mcq', options: ['Yes', 'No', 'Sometimes', 'Cannot determine'], answer: 'No', level: 2, skills: ['number classification'], explanation: 'Square roots of non-perfect squares are irrational' },
           { text: 'Express 0.75 as a fraction', type: 'mcq', options: ['3/4', '7/5', '1/4', '3/5'], answer: '3/4', level: 2, skills: ['algebra manipulation'], explanation: '0.75 = 75/100 = 3/4 when simplified' },
           { text: 'Which number is between √2 and √3?', type: 'mcq', options: ['1.2', '1.5', '1.8', '2.0'], answer: '1.5', level: 3, skills: ['problem solving'], explanation: '√2 ≈ 1.41 and √3 ≈ 1.73, so 1.5 lies between them' },
-          { text: 'Why is π considered irrational?', type: 'short', answer: 'Because its decimal expansion never ends and never repeats', level: 2, skills: ['concept recall'], explanation: 'Irrational numbers have infinite non-repeating decimals' },
-          { text: 'Compare rational and irrational numbers', type: 'short', answer: 'Rational can be expressed as fractions, irrational cannot', level: 4, skills: ['concept recall', 'problem solving'], explanation: 'This is the fundamental difference between these number types' },
-          { text: 'Find a rational number between 1/3 and 1/2', type: 'mcq', options: ['2/5', '1/4', '3/4', '2/3'], answer: '2/5', level: 3, skills: ['problem solving'], explanation: '2/5 = 0.4 which is between 0.33 and 0.5' },
-          { text: 'The product of two irrational numbers is always irrational', type: 'mcq', options: ['True', 'False'], answer: 'False', level: 5, skills: ['problem solving'], explanation: 'Counter-example: √2 × √2 = 2 (rational)' },
-          { text: 'Which set includes all the others?', type: 'mcq', options: ['Natural', 'Whole', 'Integers', 'Real'], answer: 'Real', level: 4, skills: ['number classification'], explanation: 'Real numbers include all rational and irrational numbers' },
-          { text: 'Design a real-world scenario using irrational numbers', type: 'short', answer: 'Calculating the diagonal of a unit square uses √2', level: 6, skills: ['problem solving'], explanation: 'By Pythagoras theorem, diagonal = √(1² + 1²) = √2' },
-          { text: 'Simplify: √50', type: 'mcq', options: ['5√2', '2√5', '25', '10'], answer: '5√2', level: 3, skills: ['algebra manipulation'], explanation: '√50 = √(25 × 2) = √25 × √2 = 5√2' },
-          { text: 'Is the sum of a rational and irrational number rational or irrational?', type: 'mcq', options: ['Always rational', 'Always irrational', 'Depends', 'Neither'], answer: 'Always irrational', level: 5, skills: ['problem solving'], explanation: 'Adding a rational to an irrational always gives irrational' }
+          { text: 'Which set includes all the others?', type: 'mcq', options: ['Natural', 'Whole', 'Integers', 'Real'], answer: 'Real', level: 4, skills: ['number classification'], explanation: 'Real numbers include all rational and irrational numbers' }
         ]
       },
       {
@@ -95,32 +83,8 @@ export const CBSE_CLASS_9_CONTENT: SubjectContent[] = [
           'Algebraic identities simplify calculations'
         ],
         skills: ['algebra manipulation', 'problem solving', 'concept recall'],
-        flashcards: [
-          { front: 'What is the degree of 3x² + 2x - 1?', back: '2 (highest power of x)' },
-          { front: 'State the Factor Theorem', back: 'If p(a) = 0, then (x-a) is a factor of p(x)' },
-          { front: 'What is a zero of a polynomial?', back: 'A value that makes the polynomial equal to zero' },
-          { front: 'Expand (a+b)²', back: 'a² + 2ab + b²' },
-          { front: 'What is a cubic polynomial?', back: 'A polynomial with highest degree 3' },
-          { front: 'Expand (a-b)²', back: 'a² - 2ab + b²' },
-          { front: 'What is (a+b)(a-b)?', back: 'a² - b²' },
-          { front: 'Is 5 a polynomial?', back: 'Yes, it is a constant polynomial of degree 0' },
-          { front: 'What is the coefficient of x in 3x² - 7x + 2?', back: '-7' },
-          { front: 'How many zeros can a quadratic polynomial have?', back: 'At most 2 zeros' }
-        ],
-        questions: [
-          { text: 'What is the degree of polynomial 4x³ - 2x + 5?', type: 'mcq', options: ['1', '2', '3', '4'], answer: '3', level: 1, skills: ['concept recall'], explanation: 'The highest power of x is 3' },
-          { text: 'Find the zero of p(x) = 2x - 6', type: 'mcq', options: ['2', '3', '6', '-3'], answer: '3', level: 2, skills: ['algebra manipulation'], explanation: '2x - 6 = 0, so x = 3' },
-          { text: 'Expand (x + 3)²', type: 'mcq', options: ['x² + 6x + 9', 'x² + 9', 'x² + 3x + 9', 'x² + 6x + 6'], answer: 'x² + 6x + 9', level: 2, skills: ['algebra manipulation'], explanation: 'Using (a+b)² = a² + 2ab + b²' },
-          { text: 'Is (x-2) a factor of x² - 4?', type: 'mcq', options: ['Yes', 'No'], answer: 'Yes', level: 3, skills: ['problem solving'], explanation: 'x² - 4 = (x+2)(x-2), so yes' },
-          { text: 'Find the remainder when x³ + 1 is divided by x + 1', type: 'mcq', options: ['0', '1', '2', '-1'], answer: '0', level: 3, skills: ['algebra manipulation'], explanation: 'By Remainder Theorem: p(-1) = (-1)³ + 1 = 0' },
-          { text: 'Factorize x² - 9', type: 'mcq', options: ['(x-3)²', '(x+3)²', '(x+3)(x-3)', '(x-9)(x+1)'], answer: '(x+3)(x-3)', level: 2, skills: ['algebra manipulation'], explanation: 'Using a² - b² = (a+b)(a-b)' },
-          { text: 'What is the coefficient of x² in (x+1)³?', type: 'mcq', options: ['1', '2', '3', '4'], answer: '3', level: 4, skills: ['algebra manipulation'], explanation: '(x+1)³ = x³ + 3x² + 3x + 1' },
-          { text: 'Compare linear and quadratic polynomials', type: 'short', answer: 'Linear has degree 1 and one zero; quadratic has degree 2 and up to two zeros', level: 4, skills: ['concept recall'], explanation: 'The degree determines the maximum number of zeros' },
-          { text: 'Find p(2) if p(x) = x² - 3x + 2', type: 'mcq', options: ['0', '2', '4', '-2'], answer: '0', level: 2, skills: ['algebra manipulation'], explanation: 'p(2) = 4 - 6 + 2 = 0' },
-          { text: 'Create a polynomial with zeros at 1 and -2', type: 'short', answer: '(x-1)(x+2) = x² + x - 2', level: 6, skills: ['problem solving'], explanation: 'Use the factor theorem in reverse' },
-          { text: 'Simplify: (a+b+c)²', type: 'short', answer: 'a² + b² + c² + 2ab + 2bc + 2ca', level: 3, skills: ['algebra manipulation'], explanation: 'Expand using distributive property' },
-          { text: 'If p(x) = x² - 5x + 6, find all zeros', type: 'mcq', options: ['2 and 3', '1 and 6', '-2 and -3', '2 and -3'], answer: '2 and 3', level: 3, skills: ['problem solving'], explanation: 'Factorize: (x-2)(x-3) = 0, so x = 2 or 3' }
-        ]
+        flashcards: [],
+        questions: []
       },
       {
         title: 'Coordinate Geometry',
@@ -137,32 +101,8 @@ export const CBSE_CLASS_9_CONTENT: SubjectContent[] = [
           'The y-coordinate is also called ordinate'
         ],
         skills: ['data interpretation', 'problem solving', 'concept recall'],
-        flashcards: [
-          { front: 'What are the coordinates of the origin?', back: '(0, 0)' },
-          { front: 'In which quadrant is point (-3, 4)?', back: 'Quadrant II (x negative, y positive)' },
-          { front: 'What is the abscissa of point (5, -2)?', back: '5 (the x-coordinate)' },
-          { front: 'Where do points with y = 0 lie?', back: 'On the x-axis' },
-          { front: 'What is an ordered pair?', back: 'Coordinates (x, y) where order matters' },
-          { front: 'Signs of coordinates in Quadrant III?', back: 'Both negative (-,-)' },
-          { front: 'What is the ordinate of (3, 7)?', back: '7 (the y-coordinate)' },
-          { front: 'On which axis is point (0, -5)?', back: 'The y-axis' },
-          { front: 'How many quadrants does the coordinate plane have?', back: 'Four quadrants' },
-          { front: 'What makes the x and y axes perpendicular?', back: 'They meet at 90 degrees' }
-        ],
-        questions: [
-          { text: 'What is the x-coordinate of point (3, -7)?', type: 'mcq', options: ['3', '-7', '7', '-3'], answer: '3', level: 1, skills: ['concept recall'], explanation: 'The first value in ordered pair is x-coordinate' },
-          { text: 'In which quadrant is (-5, -3)?', type: 'mcq', options: ['I', 'II', 'III', 'IV'], answer: 'III', level: 2, skills: ['concept recall'], explanation: 'Both coordinates negative means Quadrant III' },
-          { text: 'What is the ordinate of the origin?', type: 'mcq', options: ['0', '1', 'undefined', 'origin'], answer: '0', level: 1, skills: ['concept recall'], explanation: 'Origin is (0,0), ordinate (y) is 0' },
-          { text: 'A point has x = 0 and y = 5. Where does it lie?', type: 'mcq', options: ['x-axis', 'y-axis', 'origin', 'Quadrant I'], answer: 'y-axis', level: 2, skills: ['concept recall'], explanation: 'Points with x = 0 are on the y-axis' },
-          { text: 'Plot the points (2,3) and (-2,3). What do you observe?', type: 'short', answer: 'They are mirror images across the y-axis', level: 3, skills: ['data interpretation'], explanation: 'Same y, opposite x values create reflection' },
-          { text: 'Find the distance of point (4, 0) from origin', type: 'mcq', options: ['4 units', '0 units', '8 units', '2 units'], answer: '4 units', level: 3, skills: ['problem solving'], explanation: 'Point is on x-axis, distance is |4| = 4' },
-          { text: 'Which point is farthest from origin: (3,0), (0,4), (2,2)?', type: 'mcq', options: ['(3,0)', '(0,4)', '(2,2)', 'All equal'], answer: '(0,4)', level: 4, skills: ['problem solving'], explanation: 'Distances: 3, 4, √8≈2.83. So (0,4) at 4 units' },
-          { text: 'Describe the location of all points with positive abscissa', type: 'short', answer: 'Right side of y-axis (Quadrants I and IV)', level: 4, skills: ['concept recall'], explanation: 'Positive x means right of y-axis' },
-          { text: 'If (a, b) is in Quadrant IV, what can you say about a and b?', type: 'mcq', options: ['a>0, b>0', 'a<0, b>0', 'a<0, b<0', 'a>0, b<0'], answer: 'a>0, b<0', level: 3, skills: ['concept recall'], explanation: 'Quadrant IV has positive x, negative y' },
-          { text: 'Create coordinates for 4 points forming a square', type: 'short', answer: '(0,0), (2,0), (2,2), (0,2)', level: 6, skills: ['problem solving'], explanation: 'Each side length is 2, angles are 90°' },
-          { text: 'The point (-3, 4) lies on which axis?', type: 'mcq', options: ['x-axis', 'y-axis', 'Neither', 'Both'], answer: 'Neither', level: 2, skills: ['concept recall'], explanation: 'Neither coordinate is 0, so not on any axis' },
-          { text: 'Judge: Can two different points have the same coordinates?', type: 'mcq', options: ['Yes', 'No'], answer: 'No', level: 5, skills: ['concept recall'], explanation: 'Each point has unique coordinates - one-to-one correspondence' }
-        ]
+        flashcards: [],
+        questions: []
       },
       {
         title: 'Linear Equations in Two Variables',
@@ -179,32 +119,8 @@ export const CBSE_CLASS_9_CONTENT: SubjectContent[] = [
           'Equations like y = 2 represent horizontal lines'
         ],
         skills: ['algebra manipulation', 'problem solving', 'data interpretation'],
-        flashcards: [
-          { front: 'What is the standard form of linear equation in two variables?', back: 'ax + by + c = 0' },
-          { front: 'How many solutions does a linear equation in two variables have?', back: 'Infinitely many' },
-          { front: 'What shape is the graph of a linear equation?', back: 'A straight line' },
-          { front: 'Is (2, 3) a solution of x + y = 5?', back: 'Yes, because 2 + 3 = 5' },
-          { front: 'What does x = 4 look like on a graph?', back: 'A vertical line through x = 4' },
-          { front: 'What does y = -2 look like on a graph?', back: 'A horizontal line through y = -2' },
-          { front: 'How to find a solution of 2x + y = 7?', back: 'Choose any x, substitute, solve for y' },
-          { front: 'Can x + y = 5 and x + y = 6 have a common solution?', back: 'No, they are parallel lines' },
-          { front: 'What is the y-intercept of x + y = 4?', back: '4 (where line crosses y-axis, x=0)' },
-          { front: 'What is the x-intercept of 2x + y = 6?', back: '3 (where line crosses x-axis, y=0)' }
-        ],
-        questions: [
-          { text: 'Which is a linear equation in two variables?', type: 'mcq', options: ['x² + y = 5', 'x + y = 5', 'xy = 5', '1/x + y = 5'], answer: 'x + y = 5', level: 1, skills: ['concept recall'], explanation: 'Linear means power of variables is 1' },
-          { text: 'Is (1, 2) a solution of 2x + 3y = 8?', type: 'mcq', options: ['Yes', 'No'], answer: 'Yes', level: 2, skills: ['algebra manipulation'], explanation: '2(1) + 3(2) = 2 + 6 = 8 ✓' },
-          { text: 'Find the value of k if (2, k) is a solution of x + y = 5', type: 'mcq', options: ['2', '3', '5', '7'], answer: '3', level: 2, skills: ['algebra manipulation'], explanation: '2 + k = 5, so k = 3' },
-          { text: 'The equation y = 3 represents:', type: 'mcq', options: ['A point', 'Vertical line', 'Horizontal line', 'Slanted line'], answer: 'Horizontal line', level: 2, skills: ['concept recall'], explanation: 'y = constant is always horizontal' },
-          { text: 'How many points are needed to draw a line?', type: 'mcq', options: ['1', '2', '3', 'Infinite'], answer: '2', level: 1, skills: ['concept recall'], explanation: 'Two points uniquely determine a line' },
-          { text: 'Write x + y = 6 in standard form', type: 'short', answer: 'x + y - 6 = 0', level: 2, skills: ['algebra manipulation'], explanation: 'Move constant to left side' },
-          { text: 'Find two solutions of 3x + y = 9', type: 'short', answer: '(0, 9) and (3, 0)', level: 3, skills: ['algebra manipulation'], explanation: 'Substitute x=0 and y=0 separately' },
-          { text: 'Compare the lines x = 2 and y = 2', type: 'short', answer: 'x = 2 is vertical, y = 2 is horizontal; they intersect at (2, 2)', level: 4, skills: ['data interpretation'], explanation: 'Different orientations, one intersection point' },
-          { text: 'Which point lies on line 2x - y = 4?', type: 'mcq', options: ['(0, 4)', '(2, 0)', '(1, 2)', '(3, 2)'], answer: '(3, 2)', level: 3, skills: ['algebra manipulation'], explanation: '2(3) - 2 = 6 - 2 = 4 ✓' },
-          { text: 'Create an equation whose graph passes through origin', type: 'short', answer: 'x + y = 0 or 2x - 3y = 0 (any ax + by = 0)', level: 6, skills: ['problem solving'], explanation: 'No constant term means (0,0) is a solution' },
-          { text: 'If two lines are parallel, how many solutions do they share?', type: 'mcq', options: ['0', '1', '2', 'Infinite'], answer: '0', level: 4, skills: ['concept recall'], explanation: 'Parallel lines never intersect' },
-          { text: 'Evaluate: Does (4, 1) satisfy x - y = 3?', type: 'mcq', options: ['Yes', 'No'], answer: 'Yes', level: 2, skills: ['algebra manipulation'], explanation: '4 - 1 = 3 ✓' }
-        ]
+        flashcards: [],
+        questions: []
       },
       {
         title: 'Introduction to Euclid\'s Geometry',
@@ -221,32 +137,8 @@ export const CBSE_CLASS_9_CONTENT: SubjectContent[] = [
           'The whole is greater than the part'
         ],
         skills: ['concept recall', 'scientific reasoning', 'problem solving'],
-        flashcards: [
-          { front: 'Who is called the Father of Geometry?', back: 'Euclid' },
-          { front: 'What is an axiom?', back: 'A self-evident truth accepted without proof' },
-          { front: 'Name Euclid\'s famous work', back: 'Elements' },
-          { front: 'What is a postulate?', back: 'A geometric assumption specific to geometry' },
-          { front: 'What are the undefined terms in geometry?', back: 'Point, line, and plane' },
-          { front: 'State Euclid\'s 1st postulate', back: 'A straight line can be drawn from any point to any other point' },
-          { front: 'What is a theorem?', back: 'A statement that is proved using axioms and postulates' },
-          { front: '"The whole is greater than the part" is what?', back: 'An axiom' },
-          { front: 'How many postulates did Euclid give?', back: 'Five postulates' },
-          { front: 'Which postulate deals with parallel lines?', back: 'The fifth (parallel) postulate' }
-        ],
-        questions: [
-          { text: 'Euclid was a mathematician from:', type: 'mcq', options: ['India', 'Greece', 'Egypt', 'Rome'], answer: 'Greece', level: 1, skills: ['concept recall'], explanation: 'Euclid was an ancient Greek mathematician' },
-          { text: 'Which is an undefined term in geometry?', type: 'mcq', options: ['Circle', 'Point', 'Triangle', 'Angle'], answer: 'Point', level: 1, skills: ['concept recall'], explanation: 'Point, line, and plane are undefined basic terms' },
-          { text: 'An axiom is:', type: 'mcq', options: ['A proven statement', 'An assumed truth', 'A definition', 'A theorem'], answer: 'An assumed truth', level: 2, skills: ['concept recall'], explanation: 'Axioms are self-evident truths accepted without proof' },
-          { text: 'If a = b and b = c, then a = c. This is an example of:', type: 'mcq', options: ['Postulate', 'Axiom', 'Theorem', 'Definition'], answer: 'Axiom', level: 2, skills: ['concept recall'], explanation: 'Transitivity of equality is a fundamental axiom' },
-          { text: 'How does an axiom differ from a postulate?', type: 'short', answer: 'Axioms apply to all mathematics; postulates are specific to geometry', level: 4, skills: ['concept recall'], explanation: 'Both are assumptions, but with different scopes' },
-          { text: 'Which postulate states that a straight line may be extended indefinitely?', type: 'mcq', options: ['First', 'Second', 'Third', 'Fourth'], answer: 'Second', level: 3, skills: ['concept recall'], explanation: 'Euclid\'s 2nd postulate is about extending lines' },
-          { text: 'Explain why "point" is undefined', type: 'short', answer: 'It is the most basic concept; defining it would require simpler terms which don\'t exist', level: 5, skills: ['scientific reasoning'], explanation: 'Some terms must be primitive to avoid circular definitions' },
-          { text: 'A statement proved using axioms is called:', type: 'mcq', options: ['Postulate', 'Lemma', 'Theorem', 'Corollary'], answer: 'Theorem', level: 2, skills: ['concept recall'], explanation: 'Theorems are proven statements' },
-          { text: 'Compare axiom and theorem', type: 'short', answer: 'Axiom is assumed true; theorem is proved using axioms', level: 4, skills: ['concept recall'], explanation: 'The key difference is proof requirement' },
-          { text: '"Through two points, exactly one line passes." This is a:', type: 'mcq', options: ['Axiom', 'Postulate', 'Definition', 'Theorem'], answer: 'Postulate', level: 3, skills: ['concept recall'], explanation: 'This is derived from Euclid\'s first postulate' },
-          { text: 'Create a new axiom for a mathematical system', type: 'short', answer: 'Example: Every number has a unique successor', level: 6, skills: ['problem solving'], explanation: 'Axioms are foundational assumptions' },
-          { text: 'Why is the fifth postulate special?', type: 'mcq', options: ['It is the shortest', 'It led to non-Euclidean geometry', 'It is about circles', 'It was discovered last'], answer: 'It led to non-Euclidean geometry', level: 5, skills: ['scientific reasoning'], explanation: 'Attempts to prove it led to new geometries' }
-        ]
+        flashcards: [],
+        questions: []
       },
       {
         title: 'Lines and Angles',
@@ -263,32 +155,8 @@ export const CBSE_CLASS_9_CONTENT: SubjectContent[] = [
           'Angles on the same side of transversal and between parallel lines are co-interior'
         ],
         skills: ['problem solving', 'scientific reasoning', 'concept recall'],
-        flashcards: [
-          { front: 'What are vertically opposite angles?', back: 'Angles formed opposite each other when two lines intersect; they are equal' },
-          { front: 'What is a transversal?', back: 'A line that intersects two or more lines' },
-          { front: 'What are corresponding angles?', back: 'Angles in the same position at each intersection; equal when lines are parallel' },
-          { front: 'What is a linear pair?', back: 'Two adjacent angles whose sum is 180°' },
-          { front: 'Define alternate interior angles', back: 'Angles on opposite sides of transversal and inside the parallel lines' },
-          { front: 'What is the sum of co-interior angles?', back: '180° (supplementary)' },
-          { front: 'If one angle is 70°, what is its vertically opposite angle?', back: '70°' },
-          { front: 'How to prove lines are parallel?', back: 'Show that corresponding or alternate angles are equal' },
-          { front: 'What are complementary angles?', back: 'Two angles whose sum is 90°' },
-          { front: 'What are supplementary angles?', back: 'Two angles whose sum is 180°' }
-        ],
-        questions: [
-          { text: 'Vertically opposite angles are:', type: 'mcq', options: ['Complementary', 'Supplementary', 'Equal', 'Unequal'], answer: 'Equal', level: 1, skills: ['concept recall'], explanation: 'This is a fundamental property of intersecting lines' },
-          { text: 'If two parallel lines are cut by a transversal, corresponding angles are:', type: 'mcq', options: ['Supplementary', 'Equal', 'Complementary', 'Unrelated'], answer: 'Equal', level: 1, skills: ['concept recall'], explanation: 'Corresponding angles are equal for parallel lines' },
-          { text: 'Two angles form a linear pair. If one is 65°, find the other.', type: 'mcq', options: ['65°', '115°', '25°', '90°'], answer: '115°', level: 2, skills: ['problem solving'], explanation: '180° - 65° = 115°' },
-          { text: 'Co-interior angles are also called:', type: 'mcq', options: ['Corresponding angles', 'Alternate angles', 'Same-side interior angles', 'Vertically opposite'], answer: 'Same-side interior angles', level: 2, skills: ['concept recall'], explanation: 'They are on the same side of the transversal' },
-          { text: 'If alternate interior angles are 3x and 2x + 20, find x.', type: 'mcq', options: ['10', '20', '30', '40'], answer: '20', level: 3, skills: ['algebra manipulation'], explanation: '3x = 2x + 20, so x = 20' },
-          { text: 'Lines l and m are parallel. A transversal makes 75° with l. What angle does it make with m?', type: 'mcq', options: ['75° or 105°', '75° only', '105° only', '180°'], answer: '75° or 105°', level: 3, skills: ['problem solving'], explanation: 'Corresponding is 75°, co-interior is 105°' },
-          { text: 'Prove that if corresponding angles are equal, lines are parallel', type: 'short', answer: 'If corresponding angles are equal, lines cannot meet (by Euclid\'s parallel postulate), so they are parallel', level: 5, skills: ['scientific reasoning'], explanation: 'This is the converse of the parallel line theorem' },
-          { text: 'Compare alternate and corresponding angles', type: 'short', answer: 'Both are equal when lines are parallel; alternate are on opposite sides, corresponding are in same position', level: 4, skills: ['concept recall'], explanation: 'Understanding their positions is key' },
-          { text: 'If one of the angles formed by a transversal with two parallel lines is 130°, find all other angles.', type: 'short', answer: '130°, 130°, 130°, 130°, 50°, 50°, 50°, 50°', level: 4, skills: ['problem solving'], explanation: 'Use properties of parallel lines and linear pairs' },
-          { text: 'Create a problem involving alternate angles', type: 'short', answer: 'If two parallel lines are cut by a transversal, and one alternate angle is 45°, find the other alternate angle. Answer: 45°', level: 6, skills: ['problem solving'], explanation: 'Alternate angles are equal' },
-          { text: 'The sum of two adjacent angles is 180°. They are called:', type: 'mcq', options: ['Complementary pair', 'Linear pair', 'Vertical pair', 'Alternate pair'], answer: 'Linear pair', level: 1, skills: ['concept recall'], explanation: 'Linear pair angles are supplementary' },
-          { text: 'Evaluate: If co-interior angles are 85° and 95°, are the lines parallel?', type: 'mcq', options: ['Yes', 'No'], answer: 'Yes', level: 3, skills: ['problem solving'], explanation: '85° + 95° = 180°, so lines are parallel' }
-        ]
+        flashcards: [],
+        questions: []
       },
       {
         title: 'Triangles',
@@ -305,32 +173,8 @@ export const CBSE_CLASS_9_CONTENT: SubjectContent[] = [
           'Corresponding parts of congruent triangles are equal (CPCT)'
         ],
         skills: ['scientific reasoning', 'problem solving', 'concept recall'],
-        flashcards: [
-          { front: 'What is the sum of angles in a triangle?', back: '180°' },
-          { front: 'What does SSS stand for?', back: 'Side-Side-Side congruence criterion' },
-          { front: 'When do we use RHS criterion?', back: 'For right triangles: Right angle, Hypotenuse, Side' },
-          { front: 'What is SAS congruence?', back: 'Two sides and the included angle are equal' },
-          { front: 'What does CPCT stand for?', back: 'Corresponding Parts of Congruent Triangles' },
-          { front: 'Define congruent triangles', back: 'Triangles with same shape and size' },
-          { front: 'What is ASA criterion?', back: 'Two angles and the included side are equal' },
-          { front: 'Can AAA prove congruence?', back: 'No, AAA only proves similarity, not congruence' },
-          { front: 'What is an isoceles triangle?', back: 'A triangle with two equal sides' },
-          { front: 'What is an equilateral triangle?', back: 'A triangle with all three sides equal' }
-        ],
-        questions: [
-          { text: 'In triangle ABC, if angle A = 60° and angle B = 70°, find angle C.', type: 'mcq', options: ['40°', '50°', '60°', '70°'], answer: '50°', level: 2, skills: ['problem solving'], explanation: '180° - 60° - 70° = 50°' },
-          { text: 'Which criterion cannot be used to prove congruence?', type: 'mcq', options: ['SSS', 'SAS', 'AAA', 'ASA'], answer: 'AAA', level: 2, skills: ['concept recall'], explanation: 'AAA gives similarity, not congruence' },
-          { text: 'Two triangles have all corresponding sides equal. They are:', type: 'mcq', options: ['Similar', 'Congruent', 'Isosceles', 'Right-angled'], answer: 'Congruent', level: 1, skills: ['concept recall'], explanation: 'SSS criterion proves congruence' },
-          { text: 'In which case is SAS applicable?', type: 'mcq', options: ['Three sides given', 'Two sides and any angle', 'Two sides and included angle', 'All angles'], answer: 'Two sides and included angle', level: 2, skills: ['concept recall'], explanation: 'The angle must be between the two sides' },
-          { text: 'Triangle PQR ≅ Triangle XYZ by SAS. If PQ = 5, QR = 7, angle Q = 60°, find XY.', type: 'mcq', options: ['5', '7', '60°', 'Cannot determine'], answer: '5', level: 3, skills: ['problem solving'], explanation: 'XY corresponds to PQ, so XY = 5' },
-          { text: 'Compare SSS and SAS criteria', type: 'short', answer: 'SSS needs all three sides; SAS needs two sides and the angle between them', level: 4, skills: ['concept recall'], explanation: 'Both prove congruence with different information' },
-          { text: 'Prove that angles opposite to equal sides of an isosceles triangle are equal', type: 'short', answer: 'Draw altitude from apex, creating two congruent triangles by SAS (or RHS), hence base angles are equal by CPCT', level: 5, skills: ['scientific reasoning'], explanation: 'This is a classic theorem proof' },
-          { text: 'Can two triangles be congruent if they have 2 angles and 1 side equal?', type: 'mcq', options: ['Yes, always', 'No, never', 'Only if the side is included', 'Only for right triangles'], answer: 'Yes, always', level: 4, skills: ['scientific reasoning'], explanation: 'AAS or ASA will apply depending on side position' },
-          { text: 'In isosceles triangle ABC, AB = AC. If angle B = 50°, find angle A.', type: 'mcq', options: ['50°', '80°', '100°', '65°'], answer: '80°', level: 3, skills: ['problem solving'], explanation: 'Angle C = 50° too, so A = 180° - 50° - 50° = 80°' },
-          { text: 'Create a real-world example where congruence is important', type: 'short', answer: 'Manufacturing identical parts, like car doors or tiles, requires congruent shapes', level: 6, skills: ['problem solving'], explanation: 'Congruence ensures identical copies' },
-          { text: 'RHS criterion applies to:', type: 'mcq', options: ['All triangles', 'Isosceles only', 'Right triangles only', 'Equilateral only'], answer: 'Right triangles only', level: 2, skills: ['concept recall'], explanation: 'RHS specifically requires a right angle' },
-          { text: 'Judge: Two triangles have angles 30°, 60°, 90°. Are they congruent?', type: 'mcq', options: ['Yes', 'No', 'Need more information'], answer: 'Need more information', level: 5, skills: ['scientific reasoning'], explanation: 'Same angles means similar, but size may differ' }
-        ]
+        flashcards: [],
+        questions: []
       },
       {
         title: 'Quadrilaterals',
@@ -347,32 +191,8 @@ export const CBSE_CLASS_9_CONTENT: SubjectContent[] = [
           'Mid-point theorem: line joining midpoints is parallel to third side and half its length'
         ],
         skills: ['concept recall', 'problem solving', 'scientific reasoning'],
-        flashcards: [
-          { front: 'What is the angle sum of a quadrilateral?', back: '360°' },
-          { front: 'Define a parallelogram', back: 'A quadrilateral with both pairs of opposite sides parallel' },
-          { front: 'How are diagonals of a parallelogram related?', back: 'They bisect each other' },
-          { front: 'What is special about a rhombus?', back: 'All four sides are equal' },
-          { front: 'What is a trapezium?', back: 'A quadrilateral with exactly one pair of parallel sides' },
-          { front: 'What makes a square special?', back: 'It is both a rectangle and a rhombus' },
-          { front: 'State the mid-point theorem', back: 'Line joining midpoints of two sides is parallel to third side and half its length' },
-          { front: 'Are diagonals of a rectangle equal?', back: 'Yes' },
-          { front: 'Do diagonals of a rhombus bisect each other at 90°?', back: 'Yes, they are perpendicular bisectors' },
-          { front: 'Is a square a rhombus?', back: 'Yes, a square has all sides equal' }
-        ],
-        questions: [
-          { text: 'The sum of angles in a quadrilateral is:', type: 'mcq', options: ['180°', '270°', '360°', '540°'], answer: '360°', level: 1, skills: ['concept recall'], explanation: 'Quadrilateral = 4 sides, angle sum = (4-2) × 180° = 360°' },
-          { text: 'In parallelogram ABCD, if angle A = 70°, find angle C.', type: 'mcq', options: ['70°', '110°', '90°', '180°'], answer: '70°', level: 2, skills: ['problem solving'], explanation: 'Opposite angles of parallelogram are equal' },
-          { text: 'A quadrilateral with all sides equal but angles not 90° is:', type: 'mcq', options: ['Square', 'Rectangle', 'Rhombus', 'Trapezium'], answer: 'Rhombus', level: 2, skills: ['concept recall'], explanation: 'Rhombus has equal sides; square also has 90° angles' },
-          { text: 'In parallelogram PQRS, diagonals meet at O. If PO = 5cm, find PR.', type: 'mcq', options: ['5cm', '10cm', '2.5cm', '15cm'], answer: '10cm', level: 3, skills: ['problem solving'], explanation: 'Diagonals bisect each other, so PR = 2 × PO = 10cm' },
-          { text: 'Which property is NOT true for rectangles?', type: 'mcq', options: ['Opposite sides equal', 'All angles 90°', 'Diagonals equal', 'All sides equal'], answer: 'All sides equal', level: 3, skills: ['concept recall'], explanation: 'Only opposite sides are equal in a rectangle' },
-          { text: 'Compare rectangle and rhombus', type: 'short', answer: 'Rectangle has 90° angles and equal diagonals; rhombus has equal sides and perpendicular diagonals', level: 4, skills: ['concept recall'], explanation: 'They share parallelogram properties but differ in sides and angles' },
-          { text: 'If ABCD is a parallelogram and angle A + angle B = 180°, what does this prove?', type: 'mcq', options: ['AB || CD', 'AD || BC', 'AB = CD', 'AD = BC'], answer: 'AD || BC', level: 4, skills: ['scientific reasoning'], explanation: 'Co-interior angles supplementary implies parallel sides' },
-          { text: 'In triangle ABC, D and E are midpoints of AB and AC. If BC = 10cm, find DE.', type: 'mcq', options: ['5cm', '10cm', '20cm', '2.5cm'], answer: '5cm', level: 3, skills: ['problem solving'], explanation: 'Mid-point theorem: DE = BC/2 = 5cm' },
-          { text: 'A square has all properties of:', type: 'mcq', options: ['Only rectangle', 'Only rhombus', 'Both rectangle and rhombus', 'Neither'], answer: 'Both rectangle and rhombus', level: 2, skills: ['concept recall'], explanation: 'Square is a special case of both' },
-          { text: 'Create a quadrilateral that is not a parallelogram', type: 'short', answer: 'A trapezium with only one pair of parallel sides, or any irregular quadrilateral', level: 6, skills: ['problem solving'], explanation: 'Need at least one pair of non-parallel sides' },
-          { text: 'Diagonals of which quadrilateral are perpendicular bisectors?', type: 'mcq', options: ['Rectangle', 'Parallelogram', 'Rhombus', 'Trapezium'], answer: 'Rhombus', level: 3, skills: ['concept recall'], explanation: 'Rhombus diagonals are perpendicular and bisect each other' },
-          { text: 'Judge: Every square is a rhombus, but every rhombus is not a square.', type: 'mcq', options: ['True', 'False'], answer: 'True', level: 5, skills: ['scientific reasoning'], explanation: 'Square has extra property of 90° angles' }
-        ]
+        flashcards: [],
+        questions: []
       }
     ]
   },
