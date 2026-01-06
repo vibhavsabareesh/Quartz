@@ -358,6 +358,93 @@ export type Database = {
         }
         Relationships: []
       }
+      synced_calendar_events: {
+        Row: {
+          created_at: string
+          event_end: string
+          event_start: string
+          event_title: string
+          google_event_id: string
+          id: string
+          session_id: string | null
+          task_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_end: string
+          event_start: string
+          event_title: string
+          google_event_id: string
+          id?: string
+          session_id?: string | null
+          task_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_end?: string
+          event_start?: string
+          event_title?: string
+          google_event_id?: string
+          id?: string
+          session_id?: string | null
+          task_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "synced_calendar_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "focus_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "synced_calendar_events_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "daily_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_google_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          expires_at: string
+          id: string
+          refresh_token: string | null
+          scope: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          refresh_token?: string | null
+          scope?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          refresh_token?: string | null
+          scope?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_progress: {
         Row: {
           badges: string[] | null

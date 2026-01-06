@@ -13,7 +13,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { SUPPORT_MODE_INFO, TIMER_PRESETS, SupportModeKey } from '@/lib/demo-data';
 import { useToast } from '@/hooks/use-toast';
 import { Save, RefreshCw } from 'lucide-react';
-
+import { GoogleCalendarConnect } from '@/components/GoogleCalendarConnect';
+import { CalendarEventsList } from '@/components/CalendarEventsList';
 // Order modes to show primary ones first
 const MODE_ORDER: SupportModeKey[] = ['dyslexia', 'adhd', 'sensory_safe', 'autism', 'dyscalculia', 'motor_difficulties', 'chronic_fatigue'];
 
@@ -128,11 +129,29 @@ export default function Settings() {
           </Card>
         </motion.div>
 
+        {/* Google Calendar Integration */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12 }}
+        >
+          <GoogleCalendarConnect />
+        </motion.div>
+
+        {/* Calendar Events */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.14 }}
+        >
+          <CalendarEventsList />
+        </motion.div>
+
         {/* Timer Settings */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
+          transition={{ delay: 0.16 }}
         >
           <Card>
             <CardHeader>
