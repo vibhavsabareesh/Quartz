@@ -22,6 +22,7 @@ export type Database = {
           grade: number
           id: string
           key_points: string[] | null
+          skills: string[] | null
           subject_id: string
           summary: string | null
           title: string
@@ -33,6 +34,7 @@ export type Database = {
           grade: number
           id?: string
           key_points?: string[] | null
+          skills?: string[] | null
           subject_id: string
           summary?: string | null
           title: string
@@ -44,6 +46,7 @@ export type Database = {
           grade?: number
           id?: string
           key_points?: string[] | null
+          skills?: string[] | null
           subject_id?: string
           summary?: string | null
           title?: string
@@ -138,6 +141,95 @@ export type Database = {
           },
         ]
       }
+      exit_ticket_results: {
+        Row: {
+          chapter_id: string | null
+          created_at: string | null
+          id: string
+          questions_attempted: number
+          questions_correct: number
+          revision_task_created: boolean | null
+          session_id: string | null
+          skills_assessed: string[] | null
+          subject_name: string
+          user_id: string
+          weak_skills: string[] | null
+        }
+        Insert: {
+          chapter_id?: string | null
+          created_at?: string | null
+          id?: string
+          questions_attempted?: number
+          questions_correct?: number
+          revision_task_created?: boolean | null
+          session_id?: string | null
+          skills_assessed?: string[] | null
+          subject_name: string
+          user_id: string
+          weak_skills?: string[] | null
+        }
+        Update: {
+          chapter_id?: string | null
+          created_at?: string | null
+          id?: string
+          questions_attempted?: number
+          questions_correct?: number
+          revision_task_created?: boolean | null
+          session_id?: string | null
+          skills_assessed?: string[] | null
+          subject_name?: string
+          user_id?: string
+          weak_skills?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exit_ticket_results_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exit_ticket_results_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "focus_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flashcards: {
+        Row: {
+          back: string
+          chapter_id: string
+          created_at: string | null
+          front: string
+          id: string
+        }
+        Insert: {
+          back: string
+          chapter_id: string
+          created_at?: string | null
+          front: string
+          id?: string
+        }
+        Update: {
+          back?: string
+          chapter_id?: string
+          created_at?: string | null
+          front?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcards_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       focus_sessions: {
         Row: {
           actual_duration: number | null
@@ -188,39 +280,86 @@ export type Database = {
           },
         ]
       }
+      pomodoro_sessions: {
+        Row: {
+          break_completed: boolean | null
+          created_at: string | null
+          cycle_number: number
+          focus_session_id: string | null
+          id: string
+          user_id: string
+          work_completed: boolean | null
+        }
+        Insert: {
+          break_completed?: boolean | null
+          created_at?: string | null
+          cycle_number?: number
+          focus_session_id?: string | null
+          id?: string
+          user_id: string
+          work_completed?: boolean | null
+        }
+        Update: {
+          break_completed?: boolean | null
+          created_at?: string | null
+          cycle_number?: number
+          focus_session_id?: string | null
+          id?: string
+          user_id?: string
+          work_completed?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pomodoro_sessions_focus_session_id_fkey"
+            columns: ["focus_session_id"]
+            isOneToOne: false
+            referencedRelation: "focus_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       practice_questions: {
         Row: {
           chapter_id: string
           correct_answer: string
           created_at: string | null
+          explanation: string | null
           id: string
           is_math: boolean | null
+          level: number | null
           math_steps: string[] | null
           options: string[] | null
           question_text: string
           question_type: string | null
+          skills: string[] | null
         }
         Insert: {
           chapter_id: string
           correct_answer: string
           created_at?: string | null
+          explanation?: string | null
           id?: string
           is_math?: boolean | null
+          level?: number | null
           math_steps?: string[] | null
           options?: string[] | null
           question_text: string
           question_type?: string | null
+          skills?: string[] | null
         }
         Update: {
           chapter_id?: string
           correct_answer?: string
           created_at?: string | null
+          explanation?: string | null
           id?: string
           is_math?: boolean | null
+          level?: number | null
           math_steps?: string[] | null
           options?: string[] | null
           question_text?: string
           question_type?: string | null
+          skills?: string[] | null
         }
         Relationships: [
           {
@@ -241,6 +380,10 @@ export type Database = {
           id: string
           motor_large_buttons: boolean | null
           onboarding_completed: boolean | null
+          pomodoro_break_minutes: number | null
+          pomodoro_cycles_before_long_break: number | null
+          pomodoro_long_break_minutes: number | null
+          pomodoro_work_minutes: number | null
           reading_highlight_current: boolean | null
           reading_increased_spacing: boolean | null
           reading_large_font: boolean | null
@@ -260,6 +403,10 @@ export type Database = {
           id?: string
           motor_large_buttons?: boolean | null
           onboarding_completed?: boolean | null
+          pomodoro_break_minutes?: number | null
+          pomodoro_cycles_before_long_break?: number | null
+          pomodoro_long_break_minutes?: number | null
+          pomodoro_work_minutes?: number | null
           reading_highlight_current?: boolean | null
           reading_increased_spacing?: boolean | null
           reading_large_font?: boolean | null
@@ -279,6 +426,10 @@ export type Database = {
           id?: string
           motor_large_buttons?: boolean | null
           onboarding_completed?: boolean | null
+          pomodoro_break_minutes?: number | null
+          pomodoro_cycles_before_long_break?: number | null
+          pomodoro_long_break_minutes?: number | null
+          pomodoro_work_minutes?: number | null
           reading_highlight_current?: boolean | null
           reading_increased_spacing?: boolean | null
           reading_large_font?: boolean | null
@@ -336,6 +487,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      study_plans: {
+        Row: {
+          available_hours_per_day: number | null
+          created_at: string | null
+          exam_dates: Json | null
+          generated_plan: Json | null
+          id: string
+          is_active: boolean | null
+          name: string
+          priority_subjects: string[] | null
+          topics: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          available_hours_per_day?: number | null
+          created_at?: string | null
+          exam_dates?: Json | null
+          generated_plan?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          priority_subjects?: string[] | null
+          topics?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          available_hours_per_day?: number | null
+          created_at?: string | null
+          exam_dates?: Json | null
+          generated_plan?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          priority_subjects?: string[] | null
+          topics?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       subjects: {
         Row: {
@@ -452,6 +645,7 @@ export type Database = {
           current_streak: number | null
           id: string
           last_session_date: string | null
+          levels_progress: Json | null
           longest_streak: number | null
           total_focused_minutes: number | null
           total_sessions_completed: number | null
@@ -465,6 +659,7 @@ export type Database = {
           current_streak?: number | null
           id?: string
           last_session_date?: string | null
+          levels_progress?: Json | null
           longest_streak?: number | null
           total_focused_minutes?: number | null
           total_sessions_completed?: number | null
@@ -478,6 +673,7 @@ export type Database = {
           current_streak?: number | null
           id?: string
           last_session_date?: string | null
+          levels_progress?: Json | null
           longest_streak?: number | null
           total_focused_minutes?: number | null
           total_sessions_completed?: number | null
