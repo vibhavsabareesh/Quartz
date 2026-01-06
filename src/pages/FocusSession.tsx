@@ -315,8 +315,10 @@ export default function FocusSession() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progress = ((currentDuration * 60 - timeLeft) / (currentDuration * 60)) * 100;
-  const coffeeProgress = 100 - progress; // Coffee drains as time passes
+  // Calculate coffee progress as percentage of time remaining
+  // Use the actual total seconds for this phase to ensure proportional display
+  const totalSeconds = currentDuration * 60;
+  const coffeeProgress = totalSeconds > 0 ? (timeLeft / totalSeconds) * 100 : 0;
 
   if (!task && taskId !== 'quick') {
     return (
