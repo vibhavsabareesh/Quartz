@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useMode } from '@/contexts/ModeContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOnboarding } from '@/App';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { EnergySelector } from '@/components/ui/energy-selector';
@@ -62,6 +63,7 @@ interface Progress {
 export default function Home() {
   const { experienceProfile, energyLevel, setEnergyLevel, hasMode, isGuestMode } = useMode();
   const { user } = useAuth();
+  const { startOnboarding, isOnboarding } = useOnboarding();
   const navigate = useNavigate();
   
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -72,6 +74,7 @@ export default function Home() {
     total_sessions_completed: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [checkedOnboarding, setCheckedOnboarding] = useState(false);
 
   useEffect(() => {
     if (!user && !isGuestMode) {
@@ -80,6 +83,35 @@ export default function Home() {
     }
     loadData();
   }, [user, isGuestMode]);
+
+  // Check if new authenticated user needs onboarding
+  useEffect(() => {
+    const checkNewUserOnboarding = async () => {
+      if (!user || isGuestMode || isOnboarding || checkedOnboarding) return;
+      
+      const hasCompletedOnboarding = localStorage.getItem('quartz-onboarding-complete') === 'true';
+      if (hasCompletedOnboarding) {
+        setCheckedOnboarding(true);
+        return;
+      }
+
+      // Check if user has any progress (0 XP = new user)
+      const { data: progressData } = await supabase
+        .from('user_progress')
+        .select('total_xp')
+        .eq('user_id', user.id)
+        .single();
+
+      setCheckedOnboarding(true);
+
+      // If no progress record or 0 XP, start onboarding
+      if (!progressData || progressData.total_xp === 0) {
+        startOnboarding(true); // Pass true to indicate authenticated user
+      }
+    };
+
+    checkNewUserOnboarding();
+  }, [user, isGuestMode, isOnboarding, checkedOnboarding, startOnboarding]);
 
   const loadData = async () => {
     setLoading(true);
