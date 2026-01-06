@@ -12,7 +12,8 @@ import { ModeCard } from '@/components/ui/mode-card';
 import { supabase } from '@/integrations/supabase/client';
 import { SUPPORT_MODE_INFO, TIMER_PRESETS, SupportModeKey } from '@/lib/demo-data';
 import { useToast } from '@/hooks/use-toast';
-import { Save, RefreshCw } from 'lucide-react';
+import { useOnboarding } from '@/App';
+import { Save, RefreshCw, Sparkles } from 'lucide-react';
 
 // Order modes to show primary ones first
 const MODE_ORDER: SupportModeKey[] = ['dyslexia', 'adhd', 'sensory_safe', 'autism', 'dyscalculia', 'motor_difficulties', 'chronic_fatigue'];
@@ -22,6 +23,7 @@ export default function Settings() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { startOnboarding } = useOnboarding();
   
   const [saving, setSaving] = useState(false);
 
@@ -254,7 +256,7 @@ export default function Settings() {
           </motion.div>
         )}
 
-        {/* Reset */}
+        {/* Help & Tour */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -262,18 +264,25 @@ export default function Settings() {
         >
           <Card>
             <CardHeader>
-              <CardTitle>Reset</CardTitle>
+              <CardTitle>Help & Onboarding</CardTitle>
               <CardDescription>
-                Start fresh with onboarding
+                Restart the app tour or redo your preferences setup
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="default"
+                onClick={() => startOnboarding(!!user)}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Restart Tour
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => navigate('/onboarding')}
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Redo Onboarding
+                Redo Preferences
               </Button>
             </CardContent>
           </Card>
