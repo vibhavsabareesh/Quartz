@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Sparkles, Flame, Clock, Home, RotateCcw, AlertTriangle, Target } from 'lucide-react';
-import { AddToCalendarButton } from '@/components/AddToCalendarButton';
 import { ExitTicket, ExitTicketResult, ExitTicketResults } from '@/components/ExitTicket';
 
 interface SessionEndState {
@@ -81,15 +80,6 @@ export default function SessionEnd() {
           >
             <ExitTicketResults result={exitTicketResult} />
             <div className="flex flex-col gap-3">
-              {completed && task && (
-                <AddToCalendarButton
-                  title={`Study: ${task.title}`}
-                  description={`Subject: ${task.subject_name}\nDuration: ${duration} minutes\nXP Earned: ${xpEarned}`}
-                  duration={duration}
-                  variant="outline"
-                  className="w-full"
-                />
-              )}
               <Button onClick={() => navigate('/home')} className="w-full">
                 <Home className="w-4 h-4 mr-2" />
                 Back to Home
@@ -174,17 +164,7 @@ export default function SessionEnd() {
                 </motion.div>
               )}
 
-              {/* Actions */}
               <div className="flex flex-col gap-3">
-                {completed && task && (
-                  <AddToCalendarButton
-                    title={`Study: ${task.title}`}
-                    description={`Subject: ${task.subject_name}\nDuration: ${duration} minutes\nXP Earned: ${xpEarned}`}
-                    duration={duration}
-                    variant="outline"
-                    className="w-full"
-                  />
-                )}
                 <Button onClick={() => navigate('/home')} className="w-full">
                   <Home className="w-4 h-4 mr-2" />
                   Back to Home

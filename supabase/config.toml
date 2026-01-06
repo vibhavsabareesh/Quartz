@@ -6,11 +6,5 @@ verify_jwt = false
 [functions.summarize-notes]
 verify_jwt = false
 
-[functions.google-calendar-auth]
-verify_jwt = false
-
-[functions.google-calendar-sync]
-verify_jwt = false
-
 [functions.seed-content]
 verify_jwt = false
