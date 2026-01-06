@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Target, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
@@ -95,7 +95,7 @@ export default function Auth() {
     } else {
       toast({
         title: 'Account created!',
-        description: 'Welcome to NeuroStudy. Let\'s set up your preferences.',
+        description: 'Welcome to Quartz. Let\'s set up your preferences.',
       });
       navigate('/onboarding');
     }
@@ -110,10 +110,10 @@ export default function Auth() {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-primary flex items-center justify-center">
-            <Target className="w-8 h-8 text-primary-foreground" />
+          <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-card border shadow-lg flex items-center justify-center">
+            <img src="/quartz-logo.svg" alt="Quartz" className="w-10 h-10" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Welcome to NeuroStudy</h1>
+          <h1 className="text-2xl font-bold text-foreground">Welcome to Quartz</h1>
           <p className="text-muted-foreground mt-2">Sign in or create an account to continue</p>
         </div>
 
