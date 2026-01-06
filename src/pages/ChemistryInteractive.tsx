@@ -39,7 +39,7 @@ export default function ChemistryInteractive() {
               {/* Chemical Bonding Simulator Link */}
               <div className="pt-4">
                 <Button asChild size="lg" className="gap-2">
-                  <a href="/CHEMMMMM2.html" target="_blank" rel="noopener noreferrer">
+                  <a href="/CHEMMMMMMMMMM3.html" target="_blank" rel="noopener noreferrer">
                     <FlaskConical className="w-5 h-5" />
                     Try Chemical Bonding Simulator
                     <ExternalLink className="w-4 h-4" />
