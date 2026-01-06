@@ -223,15 +223,37 @@ export default function FocusSession() {
       if (completed) {
         const { data: currentProgress } = await supabase
           .from('user_progress')
-          .select('total_xp, total_focused_minutes, total_sessions_completed')
+          .select('total_xp, total_focused_minutes, total_sessions_completed, current_streak, longest_streak, last_session_date')
           .eq('user_id', user.id)
           .single();
 
         if (currentProgress) {
+          const today = new Date().toISOString().split('T')[0];
+          const lastDate = currentProgress.last_session_date;
+          
+          let newStreak = currentProgress.current_streak || 0;
+          
+          if (lastDate !== today) {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            
+            if (lastDate === yesterdayStr) {
+              newStreak += 1;
+            } else {
+              newStreak = 1;
+            }
+          }
+          
+          const newLongestStreak = Math.max(newStreak, currentProgress.longest_streak || 0);
+
           await supabase.from('user_progress').update({
             total_xp: (currentProgress.total_xp || 0) + xpEarned,
             total_focused_minutes: (currentProgress.total_focused_minutes || 0) + actualDuration,
             total_sessions_completed: (currentProgress.total_sessions_completed || 0) + 1,
+            current_streak: newStreak,
+            longest_streak: newLongestStreak,
+            last_session_date: today,
           }).eq('user_id', user.id);
         }
 
