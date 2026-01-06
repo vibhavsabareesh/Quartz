@@ -12,7 +12,9 @@ import {
   ChevronRight, 
   Search,
   Loader2,
-  Sparkles
+  Sparkles,
+  FlaskConical,
+  Gamepad2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
@@ -195,6 +197,41 @@ export default function Library() {
             ))}
           </motion.div>
         )}
+
+        {/* Interactive Learning Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <h2 className="text-lg font-semibold text-foreground mb-3">Interactive Learning</h2>
+          <Link to="/chemistry-interactive">
+            <Card className="card-interactive">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <FlaskConical className="w-8 h-8 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-semibold text-foreground">
+                        Chemistry Interactive Lab
+                      </h3>
+                      <Badge variant="secondary" className="text-xs">
+                        <Gamepad2 className="w-3 h-3 mr-1" />
+                        Game
+                      </Badge>
+                    </div>
+                    <p className="text-muted-foreground">
+                      Explore molecules, simulate reactions, and learn through play
+                    </p>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </motion.div>
 
         {/* Quick Info */}
         <motion.div
