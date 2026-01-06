@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chemical Bonding Lab - Educational Edition</title>
+    <style>
+        /* UI Colors: Spring Green (#00FF88) and Orange (#FFA500) */
+        body { margin: 0; overflow: hidden; background-color: #050505; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        canvas { display: block; }
+        
+        #video-input {
+            position: absolute; top: 0; left: 0;
+            width: 640px; height: 480px; 
+            z-index: -1; opacity: 0.001;
+            transform: scaleX(-1);
+        }
+        
+        #output_canvas {
+            position: fixed; top: 10px; right: 10px;
+            width: 200px; height: 150px;
+            border: 2px solid #00FF88;
+            z-index: 1000; opacity: 0.9; 
+            background: black; 
+            transform: scaleX(-1); 
+            object-fit: contain;
+            display: none; 
+        }
+        
+        #galaxy-canvas { position: fixed; top: 0; left: 0; z-index: 0; }
+        
+        .overlay-container {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; z-index: 100; text-align: center;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 40px;
+        }
+
+        #goal-display {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid #00FF88; padding: 10px 30px; border-radius: 15px;
+            color: white; font-size: 24px; font-weight: bold; z-index: 50;
+            display: none;
+        }
+
+        .info-card {
+            background: rgba(20, 20, 20, 0.95);
+            padding: 30px; border-radius: 20px; border: 2px solid #00FF88;
+            max-width: 550px; box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+            text-align: left; line-height: 1.6;
+        }
+
+        .curved-button {
+            margin-top: 20px; padding: 12px 35px; border: 3px solid white; border-radius: 25px; 
+            background: transparent; color: white; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: 0.3s;
+        }
+        .curved-button:hover { background: #00FF88; color: black; border-color: #00FF88; }
+
+        #vfx-container { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: none; background: #000; }
+        #instructions { position: absolute; bottom: 20px; width: 100%; text-align: center; color: white; font-size: 18px; z-index: 10; font-weight: bold; }
+        
+        #valency-popup, #edu-popup { display: none; }
+        
+        .edu-highlight { color: #00FF88; font-weight: bold; }
+        .edu-highlight-alt { color: #FFA500; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<canvas id="galaxy-canvas"></canvas>
+
+<div id="goal-display">GOAL: <span id="target-compound">...</span></div>
+
+<div id="startup-container" class="overlay-container">
+    <h1 style="font-size: 48px; text-shadow: 0 0 10px #00FF88;">Chemical Bonding Lab</h1>
+    <p>Master the art of atomic attraction.</p>
+    <button id="enter-button" class="curved-button">START EXPERIMENT</button>
+</div>
+
+<div id="edu-popup" class="overlay-container">
+    <div class="info-card">
+        <h2 style="color: #00FF88; margin-top: 0; text-align: center;">Mission Briefing</h2>
+        <p><span class="edu-highlight">Valence Electrons:</span> These are the electrons in the outermost shell of an atom. They are the "handshakes" of chemistry—atoms want a full outer shell to become stable.</p>
+        <p><span class="edu-highlight-alt">Ionic Bonding:</span> This happens when one atom gives up electrons to another. The atom that loses an electron becomes positive, and the one that gains it becomes negative. These opposite charges attract like magnets!</p>
+        <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
+        <p style="font-style: italic; text-align: center;">Your hands are color-coded to the atoms they can control. Use them to create the target molecules.</p>
+        <div style="text-align: center;">
+            <button id="close-edu-btn" class="curved-button">I'M READY</button>
+        </div>
+    </div>
+</div>
+
+<div id="valency-popup" class="overlay-container">
+    <div class="info-card">
+        <h2 id="popup-title" style="color: #00FF88; margin-top: 0;">Compound Discovered!</h2>
+        <p id="popup-desc"></p>
+        <hr style="border: 0; border-top: 1px solid #444;">
+        <h3 style="color: #FFA500; font-size: 18px;">Bonding Mechanics:</h3>
+        <p id="popup-valency"></p>
+        <button id="next-goal-btn" class="curved-button">NEXT CHALLENGE</button>
+    </div>
+</div>
+
+<div id="vfx-container">
+    <video id="video-input" autoplay playsinline></video>
+    <canvas id="output_canvas"></canvas>
+    <div id="instructions">Left (Green) Hand → Green | Right (Orange) Hand → Orange</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+
+<script>
+    // --- COLORS ---
+    const COLOR_ATOM_GREEN = 0x00FF88;   
+    const COLOR_ATOM_ORANGE = 0xFFA500;  
+    const COLOR_COMPOUND_BIG = 0x9933FF; // Purple 
+    const COLOR_COMPOUND_SMALL = 0xFFFF00; // Yellow 
+    const COLOR_VFX = 0xFFFF00;          
+
+    const COMPOUNDS = {
+        'Na2O': { 
+            name: "Sodium Oxide", 
+            desc: "A strong base used in high-quality glass.", 
+            valency: "Oxygen needs 2 electrons (-2). Two Sodium atoms provide 1 each (+1), balancing the compound perfectly.", 
+            structure: { center: 'O', satellite: 'Na', count: 2 } 
+        },
+        'H2O': { name: "Water", desc: "Essential for all known forms of life.", valency: "Oxygen shares its valence electrons with two Hydrogen atoms to create a stable molecule.", structure: { center: 'O', satellite: 'H', count: 2 } },
+        'NaCl': { name: "Sodium Chloride", desc: "Common table salt.", valency: "Sodium gives its 1 valence electron to Chlorine. The resulting +/- attraction forms the bond.", structure: { center: 'Cl', satellite: 'Na', count: 1 } },
+        'CaCl2': { name: "Calcium Chloride", desc: "A powerful salt used to melt ice.", valency: "Calcium has 2 valence electrons to give. It bonds with two Chlorine atoms (which take 1 each).", structure: { center: 'Ca', satellite: 'Cl', count: 2 } },
+        'NaOH': { name: "Sodium Hydroxide", desc: "Lye, used in soap and cleaning.", valency: "The Hydroxide ion (OH) needs 1 electron, which it takes from a Sodium atom.", structure: { center: 'OH', satellite: 'Na', count: 1 } },
+        'CaO': { name: "Calcium Oxide", desc: "Quicklime, used in construction.", valency: "Calcium gives 2 electrons directly to Oxygen. A very strong +2/-2 attraction.", structure: { center: 'O', satellite: 'Ca', count: 1 } }
+    };
+
+    let currentGoal = "";
+    let lastGoal = ""; // TRACKING FOR NO REPEATS
+    let activeCompoundKey = null;
+
+    const SPHERE_SIZE = 3.5;
+    const SCENE_WIDTH = 65; 
+    const SCENE_HEIGHT = 45; 
+    const REST_Y = -15; 
+    const PICKUP_THRESHOLD = 10;
+    const BOND_DIST = 13;
+    const SMOOTHING = 0.82;
+
+    let renderer, mainCamera, scene, hands;
+    let spheresGreen = [], spheresOrange = []; 
+    let centerSphere, markerGreen, markerOrange;
+    let wasBonded = false;
+
+    let particles, particleMaterial;
+    const particleCount = 40;
+    const particleVelocities = [];
+
+    let hL = { x: 0, y: 0, active: false, pinch: 0, heldSphere: null }; 
+    let hR = { x: 0, y: 0, active: false, pinch: 0, heldSphere: null }; 
+
+    // NO REPEAT LOGIC
+    function setRandomGoal() {
+        const keys = Object.keys(COMPOUNDS);
+        let nextGoal;
+        do {
+            nextGoal = keys[Math.floor(Math.random() * keys.length)];
+        } while (nextGoal === lastGoal); // Loop until it's a new challenge
+        
+        lastGoal = nextGoal;
+        currentGoal = nextGoal;
+        document.getElementById('target-compound').innerText = currentGoal;
+        document.getElementById('goal-display').style.display = 'block';
+    }
+
+    function createParticleSystem() {
+        const geo = new THREE.BufferGeometry();
+        const posArr = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount; i++) { particleVelocities.push(new THREE.Vector3()); }
+        geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+        particleMaterial = new THREE.PointsMaterial({ color: COLOR_VFX, size: 0.7, transparent: true, opacity: 0 });
+        particles = new THREE.Points(geo, particleMaterial);
+        scene.add(particles);
+    }
+
+    function triggerExplosion(pos) {
+        const positions = particles.geometry.attributes.position.array;
+        for (let i = 0; i < particleCount; i++) {
+            positions[i * 3] = pos.x; positions[i * 3 + 1] = pos.y; positions[i * 3 + 2] = pos.z;
+            particleVelocities[i].set((Math.random() - 0.5) * 1.8, (Math.random() - 0.5) * 1.8, (Math.random() - 0.5) * 1.8);
+        }
+        particles.geometry.attributes.position.needsUpdate = true;
+        particleMaterial.opacity = 1.0;
+    }
+
+    function createLabel(text, scale = 7) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 256; canvas.height = 256;
+        ctx.fillStyle = 'white'; ctx.font = 'Bold 100px Arial';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(text, 128, 128);
+        const tex = new THREE.Texture(canvas);
+        tex.needsUpdate = true;
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+        sprite.scale.set(scale, scale, 1);
+        return sprite;
+    }
+
+    function buildComplexMolecule(key) {
+        while(centerSphere.children.length > 0) { centerSphere.remove(centerSphere.children[0]); }
+        const data = COMPOUNDS[key];
+        centerSphere.add(createLabel(key, 9));
+        centerSphere.material.color.set(COLOR_COMPOUND_BIG);
+        
+        for(let i=0; i < data.structure.count; i++) {
+            const sub = new THREE.Mesh(
+                new THREE.SphereGeometry(SPHERE_SIZE * 0.6, 24, 24),
+                new THREE.MeshBasicMaterial({ color: COLOR_COMPOUND_SMALL, transparent: true, opacity: 0.8 })
+            );
+            const angle = (i / data.structure.count) * Math.PI * 2;
+            sub.position.set(Math.cos(angle) * 5, Math.sin(angle) * 5, 0);
+            centerSphere.add(sub);
+        }
+    }
+
+    function createAtom(color, x, labelText) {
+        const sphere = new THREE.Mesh(
+            new THREE.SphereGeometry(SPHERE_SIZE, 32, 32), 
+            new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.6 })
+        );
+        sphere.position.set(x, REST_Y, 0);
+        sphere.userData = { restX: x, restY: REST_Y, symbol: labelText };
+        sphere.add(createLabel(labelText));
+        scene.add(sphere);
+        return sphere;
+    }
+
+    // EVENT FLOW: START -> EDU -> LAB
+    document.getElementById('enter-button').onclick = () => {
+        document.getElementById('startup-container').style.display = 'none';
+        document.getElementById('edu-popup').style.display = 'flex';
+    };
+
+    document.getElementById('close-edu-btn').onclick = () => {
+        document.getElementById('edu-popup').style.display = 'none';
+        initVFX();
+        setRandomGoal();
+    };
+
+    function initVFX() {
+        document.getElementById('vfx-container').style.display = 'block';
+        document.getElementById('output_canvas').style.display = 'block';
+
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('vfx-container').appendChild(renderer.domElement);
+
+        mainCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        mainCamera.position.z = 35;
+        scene = new THREE.Scene();
+
+        spheresGreen.push(createAtom(COLOR_ATOM_GREEN, 15, 'O'), createAtom(COLOR_ATOM_GREEN, 25, 'Cl'), createAtom(COLOR_ATOM_GREEN, 5, 'OH')); 
+        spheresOrange.push(createAtom(COLOR_ATOM_ORANGE, -5, 'Na'), createAtom(COLOR_ATOM_ORANGE, -15, 'H'), createAtom(COLOR_ATOM_ORANGE, -25, 'Ca'));
+
+        centerSphere = new THREE.Mesh(
+            new THREE.SphereGeometry(SPHERE_SIZE * 1.6, 32, 32), 
+            new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.6 })
+        );
+        centerSphere.visible = false;
+        scene.add(centerSphere);
+
+        createParticleSystem();
+
+        const mGeo = new THREE.SphereGeometry(1.2, 16, 16);
+        markerGreen = new THREE.Mesh(mGeo, new THREE.MeshBasicMaterial({ color: COLOR_ATOM_GREEN, transparent: true, opacity: 0.4 }));
+        markerOrange = new THREE.Mesh(mGeo, new THREE.MeshBasicMaterial({ color: COLOR_ATOM_ORANGE, transparent: true, opacity: 0.4 }));
+        scene.add(markerGreen, markerOrange);
+
+        hands = new Hands({locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`});
+        hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.6, minTrackingConfidence: 0.6 });
+        hands.onResults(onResults);
+        
+        startCamera();
+        animate();
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        const ease = 0.16;
+
+        handleHandMovement(hL, markerGreen, spheresGreen); 
+        handleHandMovement(hR, markerOrange, spheresOrange);
+
+        if (particleMaterial.opacity > 0) {
+            const pos = particles.geometry.attributes.position.array;
+            for (let i = 0; i < particleCount; i++) {
+                pos[i*3] += particleVelocities[i].x; pos[i*3+1] += particleVelocities[i].y; pos[i*3+2] += particleVelocities[i].z;
+            }
+            particles.geometry.attributes.position.needsUpdate = true;
+            particleMaterial.opacity -= 0.02; 
+        }
+
+        [...spheresGreen, ...spheresOrange].forEach(atom => {
+            if (atom !== hL.heldSphere && atom !== hR.heldSphere) {
+                atom.position.x += (atom.userData.restX - atom.position.x) * ease;
+                atom.position.y += (atom.userData.restY - atom.position.y) * ease;
+                atom.visible = true;
+            }
+        });
+
+        if (hL.heldSphere && hR.heldSphere) {
+            const distance = hL.heldSphere.position.distanceTo(hR.heldSphere.position);
+            if (distance < BOND_DIST) {
+                const s1 = hL.heldSphere.userData.symbol;
+                const s2 = hR.heldSphere.userData.symbol;
+                let resKey = null;
+                const check = (a, b) => (s1 === a && s2 === b) || (s1 === b && s2 === a);
+
+                if (check('Ca', 'O')) resKey = 'CaO'; 
+                else if (check('Ca', 'Cl')) resKey = 'CaCl2';
+                else if (check('Na', 'Cl')) resKey = 'NaCl';
+                else if (check('Na', 'O')) resKey = 'Na2O';
+                else if (check('H', 'O') || check('H', 'OH')) resKey = 'H2O';
+                else if (check('Na', 'OH')) resKey = 'NaOH';
+
+                if (resKey) {
+                    if (!wasBonded) {
+                        activeCompoundKey = resKey;
+                        buildComplexMolecule(resKey);
+                        triggerExplosion(centerSphere.position);
+                        wasBonded = true;
+                    }
+                    centerSphere.visible = true;
+                    hL.heldSphere.visible = hR.heldSphere.visible = false;
+                    centerSphere.position.lerpVectors(hL.heldSphere.position, hR.heldSphere.position, 0.5);
+                }
+            } else { resetBond(); }
+        } else { 
+            if (wasBonded && activeCompoundKey === currentGoal) { showSuccess(activeCompoundKey); }
+            resetBond(); 
+        }
+        renderer.render(scene, mainCamera);
+    }
+
+    function resetBond() {
+        centerSphere.visible = false;
+        if (hL.heldSphere) hL.heldSphere.visible = true;
+        if (hR.heldSphere) hR.heldSphere.visible = true;
+        wasBonded = false;
+    }
+
+    function showSuccess(key) {
+        const data = COMPOUNDS[key];
+        document.getElementById('popup-title').innerText = `Created: ${data.name} (${key})`;
+        document.getElementById('popup-desc').innerText = data.desc;
+        document.getElementById('popup-valency').innerText = data.valency;
+        document.getElementById('valency-popup').style.display = 'flex';
+        activeCompoundKey = null; 
+    }
+
+    document.getElementById('next-goal-btn').onclick = () => {
+        document.getElementById('valency-popup').style.display = 'none';
+        setRandomGoal();
+    };
+
+    function handleHandMovement(hand, marker, allowedSpheres) {
+        const handPos = new THREE.Vector3(hand.x, hand.y, 0);
+        if (hand.active && hand.pinch > 0.5) {
+            if (!hand.heldSphere) {
+                let closest = null, minDist = PICKUP_THRESHOLD;
+                allowedSpheres.forEach(atom => {
+                    let d = atom.position.distanceTo(handPos);
+                    if (d < minDist) { closest = atom; minDist = d; }
+                });
+                if (closest) hand.heldSphere = closest;
+            }
+            if (hand.heldSphere) {
+                hand.heldSphere.position.x += (hand.x - hand.heldSphere.position.x) * 0.16;
+                hand.heldSphere.position.y += (hand.y - hand.heldSphere.position.y) * 0.16;
+                marker.visible = false;
+            } else { marker.position.set(hand.x, hand.y, 0); marker.visible = true; }
+        } else { hand.heldSphere = null; marker.visible = false; }
+    }
+
+    function onResults(results) {
+        const canvasElement = document.getElementById('output_canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        canvasCtx.save();
+        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+        hL.active = hR.active = false;
+        if (results.multiHandLandmarks) {
+            results.multiHandLandmarks.forEach((landmarks, i) => {
+                const label = results.multiHandedness[i].label; 
+                drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {color: (label === 'Right' ? '#FFA500' : '#00FF88'), lineWidth: 4});
+                const thumb = landmarks[4], index = landmarks[8];
+                const x = (1 - thumb.x) * SCENE_WIDTH - (SCENE_WIDTH / 2);
+                const y = (0.5 - thumb.y) * SCENE_HEIGHT;
+                const dist = Math.sqrt(Math.pow(thumb.x - index.x, 2) + Math.pow(thumb.y - index.y, 2));
+                const pinch = Math.max(0, Math.min(1, (0.22 - dist) * 12));
+                let h = (label === 'Left') ? hL : hR;
+                h.active = true; h.pinch = pinch; h.x += (x - h.x) * SMOOTHING; h.y += (y - h.y) * SMOOTHING;
+            });
+        }
+        canvasCtx.restore();
+    }
+
+    async function startCamera() {
+        const video = document.getElementById('video-input');
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+        video.srcObject = stream;
+        video.onloadedmetadata = () => {
+            const canvas = document.getElementById('output_canvas');
+            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+            const sendFrame = async () => { await hands.send({image: video}); requestAnimationFrame(sendFrame); };
+            sendFrame();
+        };
+    }
+
+    const bgRenderer = new THREE.WebGLRenderer({ canvas: document.getElementById('galaxy-canvas'), alpha: true });
+    bgRenderer.setSize(window.innerWidth, window.innerHeight);
+    const bgScene = new THREE.Scene(), bgCam = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    bgCam.position.z = 10;
+    const bgGeo = new THREE.BufferGeometry(), bgPos = new Float32Array(3000);
+    for (let i = 0; i < 3000; i++) bgPos[i] = (Math.random() - 0.5) * 200;
+    bgGeo.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
+    const stars = new THREE.Points(bgGeo, new THREE.PointsMaterial({ size: 0.1, color: 0xffffff }));
+    bgScene.add(stars);
+    function animBG() { requestAnimationFrame(animBG); stars.rotation.y += 0.0004; bgRenderer.render(bgScene, bgCam); }
+    animBG();
+</script>
+</body>
+</html>
