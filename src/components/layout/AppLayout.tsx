@@ -10,6 +10,7 @@ import {
   Settings,
   LogOut,
   Map,
+  CalendarDays,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -20,6 +21,7 @@ interface AppLayoutProps {
 const navItems = [
   { path: '/home', label: 'Today', icon: Home },
   { path: '/library', label: 'Library', icon: BookOpen },
+  { path: '/calendar', label: 'Calendar', icon: CalendarDays },
   { path: '/quartz-road', label: 'Quartz Road', icon: Map },
   { path: '/progress', label: 'Progress', icon: BarChart3 },
   { path: '/settings', label: 'Settings', icon: Settings },

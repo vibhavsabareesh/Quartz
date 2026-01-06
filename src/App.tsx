@@ -21,6 +21,7 @@ import Settings from "./pages/Settings";
 import NotesGenerator from "./pages/NotesGenerator";
 import QuartzRoad from "./pages/QuartzRoad";
 import ChemistryInteractive from "./pages/ChemistryInteractive";
+import Calendar from "./pages/Calendar";
 import NotFound from "./pages/NotFound";
 import { OnboardingGuide } from "./components/OnboardingGuide";
 
@@ -73,6 +74,7 @@ function AppContent() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/notes" element={<NotesGenerator />} />
         <Route path="/quartz-road" element={<QuartzRoad />} />
+        <Route path="/calendar" element={<Calendar />} />
         <Route path="/chemistry-interactive" element={<ChemistryInteractive />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
