@@ -6,20 +6,22 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { supabase } from '@/integrations/supabase/client';
+import { MicroStep } from '@/lib/demo-data';
 import { 
   Play, 
   Pause, 
   Square, 
   Check,
   Clock,
-  AlertCircle
+  AlertCircle,
+  SkipForward
 } from 'lucide-react';
 
 interface Task {
   id: string;
   title: string;
   subject_name: string;
-  micro_steps: string[];
+  micro_steps: MicroStep[] | string[];
   completed_micro_steps: number;
 }
 
@@ -295,35 +297,53 @@ export default function FocusSession() {
         </div>
 
         {/* Micro-steps */}
-        {task && task.micro_steps.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-left space-y-3"
-          >
-            <h3 className="font-medium text-foreground text-center">Current Step</h3>
-            <div className="p-4 bg-card rounded-xl border">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <span className="text-sm font-bold text-primary">{currentStep + 1}</span>
+        {task && task.micro_steps.length > 0 && (() => {
+          const step = task.micro_steps[currentStep];
+          const stepText = typeof step === 'string' ? step : step.text;
+          const isSkippable = typeof step === 'object' && step.skippable;
+          
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-left space-y-3"
+            >
+              <h3 className="font-medium text-foreground text-center">Current Step</h3>
+              <div className="p-4 bg-card rounded-xl border">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <span className="text-sm font-bold text-primary">{currentStep + 1}</span>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-foreground">{stepText}</p>
+                    {isSkippable && (
+                      <span className="text-xs text-muted-foreground mt-1 inline-block">
+                        (can be skipped)
+                      </span>
+                    )}
+                  </div>
+                  {currentStep < task.micro_steps.length - 1 && (
+                    <div className="flex gap-1">
+                      {isSkippable && (
+                        <Button size="sm" variant="ghost" onClick={completeStep} title="Skip step">
+                          <SkipForward className="w-4 h-4 text-muted-foreground" />
+                        </Button>
+                      )}
+                      <Button size="sm" variant="ghost" onClick={completeStep} title="Complete step">
+                        <Check className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
-                <div className="flex-1">
-                  <p className="text-foreground">{task.micro_steps[currentStep]}</p>
+                <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  Step {currentStep + 1} of {task.micro_steps.length}
                 </div>
-                {currentStep < task.micro_steps.length - 1 && (
-                  <Button size="sm" variant="ghost" onClick={completeStep}>
-                    <Check className="w-4 h-4" />
-                  </Button>
-                )}
               </div>
-              <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-                <Clock className="w-3 h-3" />
-                Step {currentStep + 1} of {task.micro_steps.length}
-              </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          );
+        })()}
       </div>
 
       {/* Ending Soon Banner (Routine mode) */}
