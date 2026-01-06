@@ -191,15 +191,6 @@ Located in `supabase/migrations/`. Key tables:
 
 ---
 
-## Quick Start for Contributors
-
-1. Read `ModeContext.tsx` to understand the adaptive system
-2. Read `demo-data.ts` to see mode definitions
-3. Run the app and try different mode combinations
-4. Pick a feature from the roadmap in README.md
-
----
-
 <p align="center">
   <strong>Quartz</strong> — Study your way.
 </p>
