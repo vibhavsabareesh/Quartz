@@ -230,7 +230,8 @@ export default function FocusSession() {
     const actualDuration = totalWorkMinutesRef.current + 
       (isBreak ? 0 : Math.floor((pomodoroConfig.work * 60 - timeLeft) / 60));
 
-    const xpEarned = completed ? actualDuration : 0;
+    // XP is proportional to focused time (minutes). Session completion still controls badges/tasks.
+    const xpEarned = Math.max(0, actualDuration);
 
     if (!isGuestMode && user && sessionId) {
       await supabase
