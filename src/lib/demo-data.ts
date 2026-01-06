@@ -124,33 +124,38 @@ export const BADGES = [
   { id: 'chapters_10', name: 'Bookworm', description: 'Complete 10 chapters', icon: '📚' },
 ];
 
-export function generateMicroSteps(taskTitle: string, isDetailed: boolean): string[] {
-  const baseSteps = [
-    `Open ${taskTitle} materials`,
-    'Read the summary',
-    'Review key points',
-    'Attempt practice questions',
-    'Note any doubts',
+export interface MicroStep {
+  text: string;
+  skippable: boolean;
+}
+
+export function generateMicroSteps(taskTitle: string, isDetailed: boolean): MicroStep[] {
+  const baseSteps: MicroStep[] = [
+    { text: `Open ${taskTitle} materials`, skippable: true },
+    { text: 'Read the summary', skippable: false },
+    { text: 'Review key points', skippable: false },
+    { text: 'Attempt practice questions', skippable: false },
+    { text: 'Note any doubts', skippable: false },
   ];
 
   if (isDetailed) {
     return [
-      `Find a quiet spot to study`,
-      `Open ${taskTitle} materials`,
-      'Take 3 deep breaths',
-      'Read the first paragraph of the summary',
-      'Pause and think about what you read',
-      'Continue reading the rest of the summary',
-      'Look at the first key point',
-      'Try to explain it in your own words',
-      'Continue with remaining key points',
-      'Open the practice questions',
-      'Read the first question carefully',
-      'Try to answer without looking at options',
-      'Check your answer',
-      'Continue with remaining questions',
-      'Write down any concepts you need to revisit',
-      'Take a moment to celebrate your progress!',
+      { text: 'Find a quiet spot to study', skippable: true },
+      { text: `Open ${taskTitle} materials`, skippable: true },
+      { text: 'Take 3 deep breaths', skippable: false },
+      { text: 'Read the first paragraph of the summary', skippable: false },
+      { text: 'Pause and think about what you read', skippable: false },
+      { text: 'Continue reading the rest of the summary', skippable: false },
+      { text: 'Look at the first key point', skippable: false },
+      { text: 'Try to explain it in your own words', skippable: false },
+      { text: 'Continue with remaining key points', skippable: false },
+      { text: 'Open the practice questions', skippable: true },
+      { text: 'Read the first question carefully', skippable: false },
+      { text: 'Try to answer without looking at options', skippable: false },
+      { text: 'Check your answer', skippable: false },
+      { text: 'Continue with remaining questions', skippable: false },
+      { text: 'Write down any concepts you need to revisit', skippable: false },
+      { text: 'Take a moment to celebrate your progress!', skippable: false },
     ];
   }
 
@@ -178,7 +183,7 @@ export function generateDailyTasks(
         subject_name: subject,
         chapter_id: chapter.id,
         estimated_minutes: 25,
-        micro_steps: generateMicroSteps(chapter.title, false),
+        micro_steps: generateMicroSteps(chapter.title, false).map(step => step.text),
       });
     }
   }

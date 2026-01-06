@@ -23,7 +23,7 @@ import {
   ChevronDown,
   X
 } from 'lucide-react';
-import { generateMicroSteps } from '@/lib/demo-data';
+import { generateMicroSteps, MicroStep } from '@/lib/demo-data';
 
 interface Task {
   id: string;
@@ -33,7 +33,7 @@ interface Task {
   estimated_minutes: number;
   status: 'pending' | 'in_progress' | 'completed' | 'skipped';
   order_index: number;
-  micro_steps: string[];
+  micro_steps: MicroStep[] | string[];
   completed_micro_steps: number;
 }
 
@@ -430,7 +430,10 @@ export default function Home() {
                             <div className="mt-3 p-3 bg-muted/50 rounded-lg">
                               <p className="text-xs font-medium text-muted-foreground mb-2">Next step:</p>
                               <p className="text-sm text-foreground">
-                                {task.micro_steps[task.completed_micro_steps] || task.micro_steps[0]}
+                                {(() => {
+                                  const step = task.micro_steps[task.completed_micro_steps] || task.micro_steps[0];
+                                  return typeof step === 'string' ? step : step.text;
+                                })()}
                               </p>
                             </div>
                           )}

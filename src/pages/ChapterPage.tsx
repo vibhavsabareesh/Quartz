@@ -168,7 +168,7 @@ export default function ChapterPage() {
         micro_steps: generateMicroSteps(
           chapter.title,
           experienceProfile.microStepsGranularity === 'detailed'
-        ),
+        ).map(step => typeof step === 'string' ? step : step.text),
         completed_micro_steps: 0,
       });
 
