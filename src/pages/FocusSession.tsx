@@ -8,6 +8,21 @@ import { CoffeeCupTimer, CycleIndicator } from '@/components/CoffeeCupTimer';
 import { supabase } from '@/integrations/supabase/client';
 import { MicroStep } from '@/lib/demo-data';
 import { cn } from '@/lib/utils';
+
+// Helper to parse micro_steps from database (handles stringified JSON objects)
+const parseMicroSteps = (steps: any[]): MicroStep[] => {
+  if (!steps || !Array.isArray(steps)) return [];
+  return steps.map(step => {
+    if (typeof step === 'string') {
+      try {
+        return JSON.parse(step);
+      } catch {
+        return { text: step, skippable: false };
+      }
+    }
+    return step;
+  });
+};
 import { 
   Play, 
   Pause, 
@@ -80,13 +95,9 @@ export default function FocusSession() {
         .single()
         .then(({ data }) => {
           if (data) {
-            // Parse micro_steps if it's a string
-            const microSteps = typeof data.micro_steps === 'string' 
-              ? JSON.parse(data.micro_steps) 
-              : data.micro_steps || [];
             setTask({
               ...data,
-              micro_steps: microSteps,
+              micro_steps: parseMicroSteps(data.micro_steps as any[]),
             } as Task);
             setCurrentStep(data.completed_micro_steps || 0);
           }
