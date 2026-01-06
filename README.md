@@ -196,12 +196,6 @@ You can explore the app without an account using Guest Mode. Select "Try as Gues
 
 ---
 
-## License
-
-MIT
-
----
-
 <p align="center">
   <strong>Quartz</strong> — Study your way.
 </p>
