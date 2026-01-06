@@ -53,40 +53,36 @@ const CHAPTERS_DATA: Record<string, any[]> = {
   ],
 };
 
-// Generate questions for a chapter
+// Generate questions for a chapter - only for Number Systems
 function generateQuestions(subject: string, chapterTitle: string, skills: string[]) {
-  const questions = [];
-  const types = ['mcq', 'mcq', 'mcq', 'short'];
-  
-  for (let i = 0; i < 12; i++) {
-    const level = Math.min(6, Math.floor(i / 2) + 1);
-    const type = types[i % 4];
-    questions.push({
-      question_text: `Question ${i + 1} about ${chapterTitle} (${subject})`,
-      question_type: type,
-      options: type === 'mcq' ? ['Option A', 'Option B', 'Option C', 'Option D'] : [],
-      correct_answer: type === 'mcq' ? 'Option A' : 'Sample answer',
-      level,
-      skills: [skills[i % skills.length]],
-      explanation: `Explanation for question ${i + 1}`,
-      is_math: subject === 'Mathematics',
-      math_steps: subject === 'Mathematics' ? ['Step 1', 'Step 2', 'Step 3'] : [],
-    });
+  // Only generate content for Number Systems chapter
+  if (chapterTitle !== 'Number Systems') {
+    return [];
   }
-  return questions;
+  
+  return [
+    { question_text: 'Which of the following is a natural number?', question_type: 'mcq', options: ['-5', '0', '7', '3.14'], correct_answer: '7', level: 1, skills: ['concept recall'], explanation: 'Natural numbers are positive counting numbers starting from 1', is_math: true, math_steps: [] },
+    { question_text: 'Is √3 a rational number?', question_type: 'mcq', options: ['Yes', 'No', 'Sometimes', 'Cannot determine'], correct_answer: 'No', level: 2, skills: ['number classification'], explanation: 'Square roots of non-perfect squares are irrational', is_math: true, math_steps: [] },
+    { question_text: 'Express 0.75 as a fraction', question_type: 'mcq', options: ['3/4', '7/5', '1/4', '3/5'], correct_answer: '3/4', level: 2, skills: ['algebra manipulation'], explanation: '0.75 = 75/100 = 3/4 when simplified', is_math: true, math_steps: ['0.75 = 75/100', '75/100 = 3/4'] },
+    { question_text: 'Which number is between √2 and √3?', question_type: 'mcq', options: ['1.2', '1.5', '1.8', '2.0'], correct_answer: '1.5', level: 3, skills: ['problem solving'], explanation: '√2 ≈ 1.41 and √3 ≈ 1.73, so 1.5 lies between them', is_math: true, math_steps: [] },
+    { question_text: 'Which set includes all the others?', question_type: 'mcq', options: ['Natural', 'Whole', 'Integers', 'Real'], correct_answer: 'Real', level: 4, skills: ['number classification'], explanation: 'Real numbers include all rational and irrational numbers', is_math: false, math_steps: [] },
+  ];
 }
 
-// Generate flashcards for a chapter
+// Generate flashcards for a chapter - only for Number Systems
 function generateFlashcards(chapterTitle: string, keyPoints: string[]) {
-  const flashcards = [];
-  for (let i = 0; i < Math.max(10, keyPoints.length); i++) {
-    const point = keyPoints[i % keyPoints.length];
-    flashcards.push({
-      front: `What is key concept ${i + 1} in ${chapterTitle}?`,
-      back: point,
-    });
+  // Only generate content for Number Systems chapter
+  if (chapterTitle !== 'Number Systems') {
+    return [];
   }
-  return flashcards;
+  
+  return [
+    { front: 'What are natural numbers?', back: 'Positive counting numbers starting from 1: 1, 2, 3, 4...' },
+    { front: 'What makes a number irrational?', back: 'It cannot be expressed as p/q and has non-terminating, non-repeating decimals' },
+    { front: 'Is √2 rational or irrational?', back: 'Irrational - it cannot be expressed as a fraction' },
+    { front: 'What is the difference between integers and whole numbers?', back: 'Integers include negative numbers, whole numbers start from 0' },
+    { front: 'Is 0 a natural number?', back: 'No, natural numbers start from 1. Zero is a whole number.' },
+  ];
 }
 
 serve(async (req) => {
