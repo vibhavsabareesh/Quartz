@@ -12,6 +12,17 @@ const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
+function safeBool(value: string | undefined | null) {
+  return !!value && value.length > 0;
+}
+
+function redact(value: string | undefined | null) {
+  if (!value) return null;
+  const suffix = value.slice(-6);
+  return `***${suffix} (len=${value.length})`;
+}
+
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -22,12 +33,33 @@ serve(async (req) => {
     const url = new URL(req.url);
     const action = url.searchParams.get('action');
 
+    console.log('[google-calendar-auth] request', {
+      method: req.method,
+      path: url.pathname,
+      action,
+      hasGoogleClientId: safeBool(GOOGLE_CLIENT_ID),
+      hasGoogleClientSecret: safeBool(GOOGLE_CLIENT_SECRET),
+      hasBackendUrl: safeBool(SUPABASE_URL),
+      hasServiceRoleKey: safeBool(SUPABASE_SERVICE_ROLE_KEY),
+    });
+
     // Handle OAuth callback
     if (action === 'callback') {
       const code = url.searchParams.get('code');
       const state = url.searchParams.get('state');
-      
+
+      console.log('[google-calendar-auth] callback received', {
+        hasCode: !!code,
+        codeLen: code?.length ?? 0,
+        hasState: !!state,
+        stateLen: state?.length ?? 0,
+      });
+
       if (!code || !state) {
+        console.error('[google-calendar-auth] callback missing params', {
+          hasCode: !!code,
+          hasState: !!state,
+        });
         return new Response('Missing code or state', { status: 400 });
       }
 
@@ -35,11 +67,19 @@ serve(async (req) => {
       let stateData;
       try {
         stateData = JSON.parse(atob(state));
-      } catch {
+      } catch (err) {
+        console.error('[google-calendar-auth] invalid state', {
+          error: err instanceof Error ? err.message : String(err),
+          statePreview: state.slice(0, 24),
+        });
         return new Response('Invalid state', { status: 400 });
       }
 
       const { userId, redirectUrl } = stateData;
+      console.log('[google-calendar-auth] parsed state', {
+        userId,
+        redirectUrl,
+      });
 
       // Exchange code for tokens
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -57,11 +97,29 @@ serve(async (req) => {
       });
 
       const tokenData = await tokenResponse.json();
-      console.log('Token response status:', tokenResponse.status);
+      console.log('[google-calendar-auth] token exchange result', {
+        status: tokenResponse.status,
+        ok: tokenResponse.ok,
+        hasAccessToken: safeBool(tokenData?.access_token),
+        accessToken: redact(tokenData?.access_token),
+        hasRefreshToken: safeBool(tokenData?.refresh_token),
+        expiresIn: tokenData?.expires_in,
+        scope: tokenData?.scope,
+        error: tokenData?.error,
+        errorDescription: tokenData?.error_description,
+      });
 
       if (!tokenResponse.ok) {
-        console.error('Token exchange error:', tokenData);
-        return new Response(`Token exchange failed: ${JSON.stringify(tokenData)}`, { status: 400 });
+        console.error('[google-calendar-auth] token exchange failed', {
+          status: tokenResponse.status,
+          error: tokenData?.error,
+          errorDescription: tokenData?.error_description,
+        });
+        return new Response(`Token exchange failed: ${JSON.stringify({
+          status: tokenResponse.status,
+          error: tokenData?.error,
+          error_description: tokenData?.error_description,
+        })}`, { status: 400 });
       }
 
       // Store tokens in database
@@ -82,16 +140,27 @@ serve(async (req) => {
         });
 
       if (upsertError) {
-        console.error('Error storing tokens:', upsertError);
+        console.error('[google-calendar-auth] failed to store tokens', {
+          userId,
+          error: upsertError.message,
+        });
         return new Response(`Failed to store tokens: ${upsertError.message}`, { status: 500 });
       }
 
+      console.log('[google-calendar-auth] tokens stored', {
+        userId,
+        expiresAt: expiresAt.toISOString(),
+        scope: tokenData?.scope,
+        hasRefreshToken: safeBool(tokenData?.refresh_token),
+      });
+
       // Redirect back to app
       const successUrl = `${redirectUrl}?google_calendar=connected`;
+      console.log('[google-calendar-auth] redirecting back to app', { successUrl });
       return new Response(null, {
         status: 302,
         headers: {
-          'Location': successUrl,
+          Location: successUrl,
         },
       });
     }
