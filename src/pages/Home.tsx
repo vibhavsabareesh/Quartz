@@ -25,6 +25,21 @@ import {
 } from 'lucide-react';
 import { generateMicroSteps, MicroStep } from '@/lib/demo-data';
 
+// Helper to parse micro_steps from database (handles stringified JSON objects)
+const parseMicroSteps = (steps: any[]): MicroStep[] => {
+  if (!steps || !Array.isArray(steps)) return [];
+  return steps.map(step => {
+    if (typeof step === 'string') {
+      try {
+        return JSON.parse(step);
+      } catch {
+        return { text: step, skippable: false };
+      }
+    }
+    return step;
+  });
+};
+
 interface Task {
   id: string;
   title: string;
@@ -123,7 +138,12 @@ export default function Home() {
         .order('order_index');
 
       if (tasksData && tasksData.length > 0) {
-        setTasks(tasksData as Task[]);
+        // Parse micro_steps for each task
+        const parsedTasks = tasksData.map(t => ({
+          ...t,
+          micro_steps: parseMicroSteps(t.micro_steps as any[]),
+        }));
+        setTasks(parsedTasks as Task[]);
       } else {
         // Generate tasks for today
         await generateTodaysTasks();
