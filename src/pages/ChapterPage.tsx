@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AITutor } from '@/components/AITutor';
+import { LevelsLadder, calculateLevelProgress } from '@/components/LevelsLadder';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   ArrowLeft, 
@@ -18,11 +19,13 @@ import {
   ChevronRight,
   ChevronLeft,
   Check,
-  X
+  X,
+  Filter
 } from 'lucide-react';
 import { generateMicroSteps } from '@/lib/demo-data';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Chapter {
   id: string;
@@ -42,6 +45,8 @@ interface PracticeQuestion {
   options: string[];
   is_math: boolean;
   math_steps: string[];
+  level?: number;
+  skills?: string[];
   // correct_answer is NOT included - it's validated server-side
 }
 
@@ -83,6 +88,11 @@ export default function ChapterPage() {
   
   // Performance tracking
   const [performance, setPerformance] = useState<ChapterPerformance | null>(null);
+  
+  // Level filtering
+  const [levelFilter, setLevelFilter] = useState<string>('all');
+  const [levelProgress, setLevelProgress] = useState<ReturnType<typeof calculateLevelProgress>>([]);
+  const [questionAttempts, setQuestionAttempts] = useState<{ level: number; is_correct: boolean }[]>([]);
 
   useEffect(() => {
     loadChapter();
@@ -91,8 +101,14 @@ export default function ChapterPage() {
   useEffect(() => {
     if (user && chapterId) {
       loadPerformance();
+      loadLevelProgress();
     }
   }, [user, chapterId]);
+  
+  useEffect(() => {
+    // Recalculate level progress when attempts change
+    setLevelProgress(calculateLevelProgress(questionAttempts));
+  }, [questionAttempts]);
 
   const loadChapter = async () => {
     if (!chapterId) return;
@@ -136,6 +152,39 @@ export default function ChapterPage() {
       }
     } catch (error) {
       console.error('Error loading performance:', error);
+    }
+  };
+
+  const loadLevelProgress = async () => {
+    if (!chapterId || !user) return;
+    
+    try {
+      // Get question attempts with level info for this chapter
+      const { data: attempts } = await supabase
+        .from('question_attempts')
+        .select('is_correct, question_id')
+        .eq('user_id', user.id)
+        .eq('chapter_id', chapterId);
+      
+      if (attempts && attempts.length > 0) {
+        // Get question levels
+        const questionIds = attempts.map(a => a.question_id);
+        const { data: questionLevels } = await supabase
+          .from('practice_questions')
+          .select('id, level')
+          .in('id', questionIds);
+        
+        const levelMap = new Map(questionLevels?.map(q => [q.id, q.level || 2]) || []);
+        
+        const attemptsWithLevels = attempts.map(a => ({
+          level: levelMap.get(a.question_id) || 2,
+          is_correct: a.is_correct,
+        }));
+        
+        setQuestionAttempts(attemptsWithLevels);
+      }
+    } catch (error) {
+      console.error('Error loading level progress:', error);
     }
   };
 
@@ -242,10 +291,18 @@ export default function ChapterPage() {
   // Split summary into sections for reading support
   const summarySections = chapter?.summary?.split('. ').filter(s => s.trim()) || [];
   
-  const currentQuestion = questions[currentQuestionIndex];
+  // Filter questions by level
+  const filteredQuestions = levelFilter === 'all' 
+    ? questions 
+    : questions.filter(q => (q.level || 2) === parseInt(levelFilter));
+  
+  const currentQuestion = filteredQuestions[currentQuestionIndex];
   const isCorrect = answerResult?.is_correct ?? false;
   const correctAnswer = answerResult?.correct_answer;
   const showMathStepMode = hasMode('dyscalculia') && currentQuestion?.is_math && currentQuestion?.math_steps?.length > 0;
+  
+  // Get chapter skills
+  const chapterSkills = [...new Set(questions.flatMap(q => q.skills || []))];
 
   // Dyslexia mode styling
   const isDyslexiaMode = hasMode('dyslexia');
@@ -321,6 +378,30 @@ export default function ChapterPage() {
                 🎯 ADHD focus mode active
               </Badge>
             )}
+          </div>
+        )}
+
+        {/* Levels Ladder - always visible */}
+        {user && levelProgress.length > 0 && (
+          <Card className="p-4">
+            <LevelsLadder 
+              progress={levelProgress} 
+              onLevelClick={(level) => {
+                setLevelFilter(level.toString());
+                setActiveTab('practice');
+                setCurrentQuestionIndex(0);
+              }}
+            />
+          </Card>
+        )}
+
+        {/* Skills covered */}
+        {chapterSkills.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <span className="text-sm text-muted-foreground">Skills:</span>
+            {chapterSkills.slice(0, 6).map(skill => (
+              <Badge key={skill} variant="outline">{skill}</Badge>
+            ))}
           </div>
         )}
 
@@ -436,35 +517,42 @@ export default function ChapterPage() {
 
           {activeTab === 'practice' && (
             <div className="space-y-4">
-              {/* Performance Stats Card */}
-              {performance && performance.total_attempts > 0 && (
-                <Card className="bg-muted/30">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between text-sm">
-                      <div className="flex items-center gap-4">
-                        <div>
-                          <span className="text-muted-foreground">Accuracy:</span>{' '}
-                          <span className={cn(
-                            "font-semibold",
-                            performance.accuracy >= 70 ? "text-success" : performance.accuracy >= 40 ? "text-warning" : "text-destructive"
-                          )}>
-                            {performance.accuracy}%
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Mastered:</span>{' '}
-                          <span className="font-semibold">{performance.mastered_questions}/{questions.length}</span>
-                        </div>
-                      </div>
-                      <div className="text-muted-foreground">
-                        {performance.total_attempts} attempt{performance.total_attempts !== 1 ? 's' : ''}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              {/* Level Filter + Performance Stats */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-muted-foreground" />
+                  <Select value={levelFilter} onValueChange={(val) => { setLevelFilter(val); setCurrentQuestionIndex(0); }}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue placeholder="Filter by level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Levels</SelectItem>
+                      <SelectItem value="1">Level 1: Recall</SelectItem>
+                      <SelectItem value="2">Level 2: Explain</SelectItem>
+                      <SelectItem value="3">Level 3: Apply</SelectItem>
+                      <SelectItem value="4">Level 4: Compare</SelectItem>
+                      <SelectItem value="5">Level 5: Judge</SelectItem>
+                      <SelectItem value="6">Level 6: Create</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {performance && performance.total_attempts > 0 && (
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className={cn(
+                      "font-semibold",
+                      performance.accuracy >= 70 ? "text-success" : performance.accuracy >= 40 ? "text-warning" : "text-destructive"
+                    )}>
+                      {performance.accuracy}% accuracy
+                    </span>
+                    <span className="text-muted-foreground">
+                      {performance.total_attempts} attempts
+                    </span>
+                  </div>
+                )}
+              </div>
               
-              {questions.length === 0 ? (
+              {filteredQuestions.length === 0 ? (
                 <Card className="p-8 text-center">
                   <HelpCircle className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
                   <p className="text-lg font-medium">No practice questions yet</p>
@@ -475,12 +563,24 @@ export default function ChapterPage() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">
-                        Question {currentQuestionIndex + 1} of {questions.length}
+                        Question {currentQuestionIndex + 1} of {filteredQuestions.length}
                       </CardTitle>
-                      {currentQuestion?.is_math && (
-                        <Badge variant="secondary">Math</Badge>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {currentQuestion?.level && (
+                          <Badge variant="outline">Level {currentQuestion.level}</Badge>
+                        )}
+                        {currentQuestion?.is_math && (
+                          <Badge variant="secondary">Math</Badge>
+                        )}
+                      </div>
                     </div>
+                    {currentQuestion?.skills && currentQuestion.skills.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {currentQuestion.skills.map(skill => (
+                          <Badge key={skill} variant="secondary" className="text-xs">{skill}</Badge>
+                        ))}
+                      </div>
+                    )}
                     {hasMode('dyscalculia') && currentQuestion?.is_math && (
                       <p className="text-sm text-primary">Step-by-step mode active • No time pressure</p>
                     )}
@@ -582,7 +682,7 @@ export default function ChapterPage() {
                           size={experienceProfile.largeButtons ? "lg" : "default"}
                           onClick={nextQuestion}
                         >
-                          {currentQuestionIndex === questions.length - 1 ? 'Finish' : 'Next'}
+                          {currentQuestionIndex === filteredQuestions.length - 1 ? 'Finish' : 'Next'}
                           <ChevronRight className="w-4 h-4 ml-1" />
                         </Button>
                       )}
