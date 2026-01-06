@@ -40,9 +40,14 @@ interface PracticeQuestion {
   question_text: string;
   question_type: string;
   options: string[];
-  correct_answer: string;
   is_math: boolean;
   math_steps: string[];
+  // correct_answer is NOT included - it's validated server-side
+}
+
+interface AnswerResult {
+  is_correct: boolean;
+  correct_answer: string | null;
 }
 
 export default function ChapterPage() {
@@ -61,6 +66,8 @@ export default function ChapterPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showResult, setShowResult] = useState(false);
+  const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
+  const [checkingAnswer, setCheckingAnswer] = useState(false);
   const [currentMathStep, setCurrentMathStep] = useState(0);
 
   // Reading support state
@@ -86,10 +93,9 @@ export default function ChapterPage() {
         setChapter(chapterData as Chapter);
       }
 
+      // Use secure RPC function that doesn't expose correct_answer
       const { data: questionsData } = await supabase
-        .from('practice_questions')
-        .select('*')
-        .eq('chapter_id', chapterId);
+        .rpc('get_practice_questions', { p_chapter_id: chapterId });
 
       if (questionsData) {
         setQuestions(questionsData as PracticeQuestion[]);
@@ -148,8 +154,32 @@ export default function ChapterPage() {
     }
   };
 
-  const checkAnswer = () => {
-    setShowResult(true);
+  const checkAnswer = async () => {
+    if (!currentQuestion || !selectedAnswer) return;
+    
+    setCheckingAnswer(true);
+    try {
+      const { data, error } = await supabase
+        .rpc('check_answer', { 
+          p_question_id: currentQuestion.id, 
+          p_user_answer: selectedAnswer 
+        });
+      
+      if (error) throw error;
+      
+      const result = data as unknown as AnswerResult;
+      setAnswerResult(result);
+      setShowResult(true);
+    } catch (error) {
+      console.error('Error checking answer:', error);
+      toast({
+        title: 'Error',
+        description: 'Could not check answer. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setCheckingAnswer(false);
+    }
   };
 
   const nextQuestion = () => {
@@ -157,6 +187,7 @@ export default function ChapterPage() {
       setCurrentQuestionIndex(prev => prev + 1);
       setSelectedAnswer(null);
       setShowResult(false);
+      setAnswerResult(null);
       setCurrentMathStep(0);
     }
   };
@@ -166,6 +197,7 @@ export default function ChapterPage() {
       setCurrentQuestionIndex(prev => prev - 1);
       setSelectedAnswer(null);
       setShowResult(false);
+      setAnswerResult(null);
       setCurrentMathStep(0);
     }
   };
@@ -174,7 +206,8 @@ export default function ChapterPage() {
   const summarySections = chapter?.summary?.split('. ').filter(s => s.trim()) || [];
   
   const currentQuestion = questions[currentQuestionIndex];
-  const isCorrect = selectedAnswer === currentQuestion?.correct_answer;
+  const isCorrect = answerResult?.is_correct ?? false;
+  const correctAnswer = answerResult?.correct_answer;
   const showMathStepMode = hasMode('dyscalculia') && currentQuestion?.is_math && currentQuestion?.math_steps?.length > 0;
 
   // Dyslexia mode styling
@@ -430,13 +463,13 @@ export default function ChapterPage() {
                           <button
                             key={index}
                             onClick={() => !showResult && setSelectedAnswer(option)}
-                            disabled={showResult}
+                            disabled={showResult || checkingAnswer}
                             className={cn(
                               "w-full p-4 text-left rounded-lg border-2 transition-all",
                               showResult
-                                ? option === currentQuestion.correct_answer
+                                ? option === correctAnswer
                                   ? 'border-success bg-success/10'
-                                  : option === selectedAnswer
+                                  : option === selectedAnswer && !isCorrect
                                   ? 'border-destructive bg-destructive/10'
                                   : 'border-border'
                                 : selectedAnswer === option
@@ -447,10 +480,10 @@ export default function ChapterPage() {
                           >
                             <div className="flex items-center justify-between">
                               <span>{option}</span>
-                              {showResult && option === currentQuestion.correct_answer && (
+                              {showResult && option === correctAnswer && (
                                 <Check className="w-5 h-5 text-success" />
                               )}
-                              {showResult && option === selectedAnswer && option !== currentQuestion.correct_answer && (
+                              {showResult && option === selectedAnswer && option !== correctAnswer && (
                                 <X className="w-5 h-5 text-destructive" />
                               )}
                             </div>
@@ -475,9 +508,9 @@ export default function ChapterPage() {
                         <Button
                           size={experienceProfile.largeButtons ? "lg" : "default"}
                           onClick={checkAnswer}
-                          disabled={!selectedAnswer}
+                          disabled={!selectedAnswer || checkingAnswer}
                         >
-                          Check Answer
+                          {checkingAnswer ? 'Checking...' : 'Check Answer'}
                         </Button>
                       ) : (
                         <Button
