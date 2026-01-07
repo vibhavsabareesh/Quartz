@@ -54,8 +54,8 @@ function AppContent() {
   
   const endOnboarding = () => {
     setIsOnboarding(false);
-    // Authenticated users go to home, guests go to auth
-    navigate(onboardingUser ? '/home' : '/auth');
+    // After the tour, take users to the onboarding/struggles page
+    navigate('/onboarding');
   };
 
   return (
