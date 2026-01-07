@@ -85,23 +85,10 @@ const onboardingSteps: OnboardingStep[] = [
   }
 ];
 
-// Get position classes for the guide card
+// Get position classes for the guide card - keep everything centered
 function getPositionClasses(position: OnboardingStep['position']): string {
-  switch (position) {
-    case 'center':
-      return 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2';
-    case 'top-left':
-      return 'top-20 left-4';
-    case 'top-right':
-      return 'top-20 right-4';
-    case 'bottom-left':
-      return 'bottom-24 left-4';
-    case 'bottom-right':
-      return 'bottom-24 right-4';
-    case 'bottom-center':
-    default:
-      return 'bottom-4 left-1/2 -translate-x-1/2';
-  }
+  // All positions now stay centered to avoid going into dead space
+  return 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2';
 }
 
 interface OnboardingGuideProps {
