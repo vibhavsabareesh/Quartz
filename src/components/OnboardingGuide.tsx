@@ -162,7 +162,7 @@ export function OnboardingGuide({ onComplete }: OnboardingGuideProps) {
   const positionClasses = getPositionClasses(step.position);
 
   return (
-    <div className="fixed inset-0 z-50 pointer-events-none">
+    <div className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center p-4">
       {/* Subtle overlay - no blur, just a light dim */}
       <motion.div 
         key={`overlay-${currentStep}`}
@@ -173,7 +173,7 @@ export function OnboardingGuide({ onComplete }: OnboardingGuideProps) {
         className="absolute inset-0 bg-background/30 pointer-events-auto" 
       />
       
-      {/* Floating guide card - moves to different positions */}
+      {/* Floating guide card - centered using flexbox */}
       <AnimatePresence mode="wait">
         <motion.div
           key={step.id}
@@ -186,7 +186,7 @@ export function OnboardingGuide({ onComplete }: OnboardingGuideProps) {
             stiffness: 300,
             damping: 25
           }}
-          className={`absolute w-full max-w-md px-4 pointer-events-auto ${positionClasses}`}
+          className="relative w-full max-w-md pointer-events-auto max-h-[90vh] overflow-y-auto"
         >
           {/* Progress bar */}
           <div className="mb-3">
